@@ -1,0 +1,628 @@
+#id: "com.anthropic.AILang.agentic"
+#version: "0.2.0"
+
+// ==========================================
+// AILang v0.2.0: RAG & Agentic AI System
+// Based on MITRE ATLAS v5.4 + OWASP LLM 2025
+// Methodology: Case_1_v0.1 (6-step MAL approach)
+// ==========================================
+
+category Foundation {
+    abstract asset Infrastructure
+      user info: "AI 시스템의 기본 인프라 (VPC, 네트워크, 접근제어)"
+    {
+        # accessControl @tag[M0005,M0019]
+            user info: "IAM 기반 접근제어"
+        # dataEncryption @tag[M0012,M0005]
+            user info: "KMS 기반 저장 데이터 암호화"
+        # networkIsolation @tag[VPC]
+            user info: "VPC를 통한 네트워크 격리"
+    }
+
+    asset VPCNetwork extends Infrastructure
+      user info: "Virtual Private Cloud 네트워크"
+    {
+        | bypassNetwork
+          user info: "네트워크 격리 우회"
+          [Exponential(0.01)]
+          -> accessModels,
+             accessStorage,
+             accessDatabase
+        & isolatedExecution
+          <- networkIsolation
+          -> secureDataFlow
+    }
+
+    asset IAMRolePolicy extends Infrastructure
+      user info: "Identity & Access Management 역할 및 정책"
+    {
+        // AML.T0035 - AI Artifact Collection
+        | discoverRoles
+          user info: "IAM 역할 열거"
+          [Exponential(0.05)]
+          -> escalatePrivilege
+        & enforceMinimalPrivilege
+          <- accessControl
+          -> preventExfiltration
+    }
+
+    asset KMSEncryption extends Infrastructure
+      user info: "Key Management Service를 통한 암호화"
+    {
+        // AML.T0025 - Exfiltration via Cyber Means
+        | bypassEncryption
+          user info: "KMS 키 접근으로 암호화 우회"
+          [Gamma(1.5, 15)]
+          -> decryptSecrets,
+             exfiltrateData
+        & encryptionEnforced
+          <- dataEncryption
+          -> protectData
+    }
+
+    asset MonitoringAndLogging extends Infrastructure
+      user info: "AI 시스템 감시 및 로깅 (AML.M0024)"
+      developer info: "텔레메트리 로깅을 통한 공격 탐지"
+    {
+        | disableLogging
+          user info: "로깅 시스템 비활성화"
+          [Exponential(0.1)]
+          -> evadeDetection
+        & telemetryEnabled
+          <- TelemetryLogging
+          -> detectAnomalies,
+             auditAPIAccess
+    }
+}
+
+category DataManagement {
+    abstract asset AIData
+      user info: "AI 시스템의 데이터 자산 (학습 데이터, 모델 아티팩트)"
+    {
+        # dataValidation @tag[M0014,M0025]
+            user info: "데이터 무결성 검증 및 출처 추적"
+        # accessControl @tag[M0005]
+            user info: "데이터 접근 제어"
+        # dataSanitization @tag[M0007]
+            user info: "악의적 데이터 제거"
+    }
+
+    asset TrainingData extends AIData
+      user info: "모델 학습에 사용되는 데이터셋"
+      developer info: "독 공격(poisoning), 백도어 주입 위험"
+    {
+        // AML.T0020 - Poison Training Data
+        // AML.T0019 - Publish Poisoned Datasets
+        | accessTrainingData
+          user info: "학습 데이터 접근"
+          [Exponential(0.05)]
+          -> poisonTrainingData,
+             backdoorInjection
+        | poisonTrainingData
+          user info: "학습 데이터 중독 (Model drift, backdoor)"
+          [Gamma(2, 10)]
+          -> corruptModel,
+             triggerBackdoor
+        | backdoorInjection
+          user info: "특정 입력에서 악성 동작하도록 백도어 삽입"
+          [Gamma(2.5, 8)]
+          -> modelBehaviorModification
+        & validateDataProvenance
+          <- dataValidation
+          -> detectPoisoning
+        & sanitizeData
+          <- dataSanitization
+          -> preventPoisoning
+    }
+
+    asset ModelArtifacts extends AIData
+      user info: "학습된 모델, 가중치, 체크포인트"
+      developer info: "모델 추출, 조작, 공급망 손상 위험"
+    {
+        // AML.T0024.002 - Extract AI Model
+        // AML.T0018 - Manipulate AI Model
+        // AML.T0010 - AI Supply Chain Compromise
+        | accessModelArtifacts
+          user info: "모델 파일 접근"
+          [Exponential(0.03)]
+          -> extractModel,
+             manipulateModel,
+             replaceModel
+        | extractModel
+          user info: "모델 추출 (모델 소유권 침해, 지적재산권 탈취)"
+          [Gamma(1.5, 12)]
+          -> exfiltrateModelWeights,
+             reverseEngineer
+        | manipulateModel
+          user info: "모델 가중치/아키텍처 변조"
+          [Gamma(2, 10)]
+          -> modelMisbehavior,
+             triggerBackdoor
+        | replaceModel
+          user info: "악성 모델로 대체 (완전한 모델 제어)"
+          [Exponential(0.02)]
+          -> fullModelControl
+        # verifyArtifacts @tag[M0014]
+            user info: "서명 검증으로 변조 감지"
+        & verifyModelIntegrity
+          <- verifyArtifacts
+          -> preventModelManipulation
+    }
+
+    asset VectorDatabaseStorage extends AIData
+      user info: "RAG 시스템의 임베딩 저장소 (Milvus 등)"
+      developer info: "문서 중독, 검색 결과 조작, 메타데이터 공격 위험"
+    {
+        // OWASP LLM 2025 #2 - Unsafe RAG Retrieval
+        // Document Poisoning in Vector DB
+        | accessVectorDB
+          user info: "벡터 DB 접근"
+          [Exponential(0.04)]
+          -> poisonDocuments,
+             manipulateMetadata,
+             similarityAttack
+        | poisonDocuments
+          user info: "악성 문서 삽입 (LLM 응답 변조)"
+          [Gamma(1.5, 10)]
+          -> retrieveHarmfulContext,
+             manipulateLLMResponse
+        | manipulateMetadata
+          user info: "메타데이터 조작 (XSS, 인젝션)"
+          [Exponential(0.05)]
+          -> metadataAttack
+        | similarityAttack
+          user info: "유사도 점수 조작으로 검색 순위 변경"
+          [Gamma(2, 12)]
+          -> biasRetrieval
+        & validateDocumentSource @tag[M0023,M0025]
+            user info: "문서 출처 검증 및 BOM"
+        & filterRetrievedDocuments @tag[M0005]
+            user info: "검색 결과 필터링 및 접근제어"
+    }
+}
+
+category CoreServices {
+    abstract asset AIModel
+      user info: "Generative Language Model 기반 자산"
+      developer info: "쿼리 기반 공격, 회피 공격, 할루시네이션 위험"
+    {
+        # queryRateLimiting @tag[M0004]
+            user info: "쿼리 수 제한으로 모델 추출 방어"
+        # outputObfuscation @tag[M0002]
+            user info: "출력 난독화로 정보 유출 방지"
+        # adversarialDetection @tag[M0015]
+            user info: "적대적 입력 탐지"
+        # modelHardening @tag[M0003]
+            user info: "모델 강화 (적대적 훈련)"
+    }
+
+    asset GenerativeLLM extends AIModel
+      user info: "생성형 언어 모델 (GPT, Claude 등)"
+      developer info: "프롬프트 인젝션, 적대적 입력, 서비스거부 위협"
+    {
+        | receiveUserInput
+          user info: "사용자 입력 수신"
+          -> processPrompt,
+             promptInjection,
+             jailbreakAttempt
+        | processPrompt
+          user info: "프롬프트 처리 및 응답 생성"
+          [Exponential(0.1)]
+          -> generateResponse
+        // AML.T0043 - Craft Adversarial Data
+        | jailbreakAttempt
+          user info: "가드레일 우회 시도 (프롬프트 인젝션)"
+          [Gamma(1.5, 8)]
+          -> bypassSafety,
+             generateHarmfulContent
+        | promptInjection
+          user info: "프롬프트에 악성 명령 주입"
+          [Gamma(2, 10)]
+          -> alterBehavior,
+             leakSystemPrompt,
+             exfiltrateContext
+        | bypassSafety
+          user info: "안전 제어 회피"
+          -> generateProhibitedContent
+        | generateResponse
+          user info: "LLM이 응답 생성"
+          -> sendToOutput
+        & enforcePromptProtection @tag[M0020]
+            user info: "프롬프트 보호 (Google Guardrails)"
+        & limitModelQueries @tag[M0004]
+            user info: "API 쿼리 제한으로 탐사 방어"
+    }
+
+    asset RetrievalModule extends AIModel
+      user info: "RAG의 문서 검색 모듈"
+      developer info: "컨텍스트 주입, 검색 조작, 독 문서 위험"
+    {
+        | receiveQuery
+          user info: "사용자 쿼리 수신"
+          -> vectorizeQuery,
+             contextInjection
+        | vectorizeQuery
+          user info: "쿼리를 벡터로 변환"
+          -> searchVector
+        // Context Injection Attack
+        | contextInjection
+          user info: "쿼리에 악성 컨텍스트 주입"
+          [Gamma(1.5, 10)]
+          -> poisonSearchContext,
+             manipulateResults
+        | searchVector
+          user info: "벡터 유사도 검색"
+          -> retrieveDocuments
+        | poisonSearchContext
+          user info: "검색 컨텍스트 중독으로 결과 변조"
+          -> harefulDocumentRetrieval
+        | retrieveDocuments
+          user info: "관련 문서 검색"
+          -> rankResults,
+             returnToLLM
+        & validateQueryInput @tag[M0015]
+            user info: "쿼리 입력 검증 및 살균화"
+        & filterPoisonedDocs @tag[M0025]
+            user info: "독 문서 필터링"
+    }
+
+    asset VectorEmbedding extends AIModel
+      user info: "텍스트 임베딩 생성 모듈"
+      developer info: "임베딩 공격, 유사도 조작"
+    {
+        | generateEmbedding
+          user info: "텍스트를 고차원 벡터로 변환"
+          [Exponential(0.05)]
+          -> storeVector
+        | storeVector
+          user info: "벡터 저장소에 저장"
+          -> vectorStored
+        # encryptEmbedding @tag[M0012]
+            user info: "임베딩 암호화 저장"
+    }
+
+    asset AgentOrchestrator
+      user info: "에이전트 액션 제어 및 의도 검증"
+      developer info: "도구 남용, 액션 변조, 권한 상승 위험"
+    {
+        | agentDecision
+          user info: "에이전트가 실행할 액션 결정"
+          -> validateAction,
+             executeAction,
+             maliciousAction
+        // AML.TA0012 - Privilege Escalation via Agent
+        | validateAction
+          user info: "액션의 정당성 및 권한 검증"
+          -> approvedAction,
+             rejectedAction
+        | maliciousAction
+          user info: "악의적 액션 실행 시도"
+          [Gamma(2, 10)]
+          -> bypassValidation,
+             escalatePrivilege
+        | executeAction
+          user info: "승인된 액션 실행"
+          -> toolInvocation
+        | bypassValidation
+          user info: "액션 검증 우회"
+          -> unauthorizedAction
+        & whitelistActions @tag[M0019]
+            user info: "허용된 도구 목록으로 제한"
+        & enforceIntentVerification @tag[M0015]
+            user info: "의도 재검증 (고위험 액션)"
+    }
+
+    asset ToolCapabilityModule
+      user info: "에이전트가 사용할 수 있는 도구 모음"
+      developer info: "도구 남용, 권한 상승, 데이터 접근"
+    {
+        | invokeTool
+          user info: "도구 호출"
+          -> executeTool,
+             accessResource
+        | executeTool
+          user info: "도구 실행 (파일 접근, API 호출 등)"
+          [Exponential(0.1)]
+          -> accessResource
+        // AML.T0024 - Exfiltration via Tool
+        | accessResource
+          user info: "리소스 접근 (파일, DB, API)"
+          -> readData,
+             modifyData,
+             executeCommand
+        | readData
+          user info: "데이터 읽기"
+          -> dataAccess
+        | modifyData
+          user info: "데이터 수정/삭제"
+          -> dataIntegrity
+        # isolateTool @tag[M0011,M0019]
+            user info: "도구 격리 및 권한 제한"
+        & validateToolInput @tag[M0015]
+            user info: "도구 입력 살균화"
+    }
+}
+
+category UserInterface {
+    asset UserInputProcessor
+      user info: "사용자 입력 수신 및 검증"
+      developer info: "프롬프트 인젝션, 악성 입력 위험"
+    {
+        | receiveInput
+          user info: "사용자로부터 입력 수신"
+          -> parseInput,
+             validateInput,
+             injectPayload
+        | parseInput
+          user info: "입력 파싱"
+          -> processInput
+        | validateInput
+          user info: "입력 검증 및 살균화"
+          -> sanitizedInput
+        | injectPayload
+          user info: "악성 페이로드 주입"
+          [Gamma(1.5, 8)]
+          -> bypassValidation
+        & enforceInputValidation @tag[M0015]
+            user info: "입력 유효성 검증"
+        & blockMaliciousPatterns @tag[BlockList]
+            user info: "악성 패턴 차단 (Google Guardrails)"
+    }
+
+    asset OutputProcessor
+      user info: "LLM 응답 처리 및 정제"
+      developer info: "유해 콘텐츠, 정보 유출, XSS"
+    {
+        | receiveResponse
+          user info: "LLM으로부터 응답 수신"
+          -> filterResponse,
+             sanitizeOutput,
+             sendToUser
+        | filterResponse
+          user info: "안전 필터 적용"
+          -> cleanResponse
+        | sanitizeOutput
+          user info: "출력 살균화 (XSS 방지)"
+          -> sanitizedResponse
+        | sendToUser
+          user info: "사용자에게 응답 전송"
+          -> userReceivesResponse
+        # obfuscateOutput @tag[M0002]
+            user info: "민감 정보 난독화"
+        & enforceOutputValidation @tag[M0015]
+            user info: "출력 검증"
+    }
+
+    asset GuardRails
+      user info: "에이전트/LLM 안전 제어 (Google Cloud style)"
+      developer info: "4가지 계층: Prompt Protection, Blocklist, Safety Levels, Custom Rules"
+    {
+        | promptProtection
+          user info: "프롬프트 인젝션 기본 방어"
+          -> blockPromptAttack,
+             escalateToHuman
+        | blocklist
+          user info: "차단 목록 필터 (키워드/정규식)"
+          -> filterBlacklisted
+        | safetylevelCheck
+          user info: "안전 수준 확인 (Relaxed/Balanced/Strict)"
+          -> applySafetyPolicy
+        | customRule
+          user info: "커스텀 보안 규칙 (after_model_callback)"
+          -> executeCustomLogic
+        # guardRailsEnabled @tag[M0020]
+            user info: "가드레일 활성화"
+    }
+}
+
+category Security {
+    abstract asset SecurityControl
+      user info: "보안 제어 메커니즘"
+    {
+        # implemented
+            user info: "보안 제어 구현됨"
+    }
+
+    asset AccessControl extends SecurityControl
+      user info: "IAM 기반 접근제어"
+      developer info: "AML.M0005, M0019 매핑"
+    {
+        | enforceAccess
+          user info: "접근제어 정책 적용"
+          <- accessControl
+        # accessControlEnforced @tag[M0005,M0019]
+            user info: "접근제어 활성화"
+            -> enforceAccess
+    }
+
+    asset DataValidation extends SecurityControl
+      user info: "데이터 무결성 및 출처 검증"
+      developer info: "AML.M0014, M0025 매핑"
+    {
+        | checkDataIntegrity
+          user info: "데이터 서명 검증"
+          <- dataValidation
+        | validateProvenance
+          user info: "데이터 출처 추적 (AI BOM)"
+          <- dataValidation
+        # dataValidationEnabled @tag[M0014,M0025]
+            user info: "데이터 검증 활성화"
+            -> checkDataIntegrity,
+               validateProvenance
+    }
+
+    asset TelemetryLogging extends SecurityControl
+      user info: "AI 시스템 감시 로깅 (AML.M0024)"
+      developer info: "2025년 신규 방어 대책"
+    {
+        | logAPIAccess
+          user info: "API 호출 로깅"
+          <- TelemetryLogging
+        | logModelQueries
+          user info: "모델 쿼리 로깅"
+          <- TelemetryLogging
+        | detectAnomalies
+          user info: "이상 탐지"
+          <- TelemetryLogging
+        # telemetryLoggingEnabled @tag[M0024]
+            user info: "텔레메트리 로깅 활성화"
+            -> logAPIAccess,
+               logModelQueries,
+               detectAnomalies
+    }
+
+    asset AdversarialDetection extends SecurityControl
+      user info: "적대적 입력 탐지 (AML.M0015)"
+    {
+        | detectAdversarial
+          user info: "적대적 입력 패턴 감지"
+          [Exponential(0.2)]
+          <- adversarialDetection
+        | blockAdversarial
+          user info: "적대적 입력 차단"
+          <- adversarialDetection
+        # adversarialProtection @tag[M0015]
+            user info: "적대적 입력 방어 활성화"
+            -> detectAdversarial,
+               blockAdversarial
+    }
+
+    asset QueryRateLimiting extends SecurityControl
+      user info: "모델 쿼리 수 제한 (AML.M0004)"
+      developer info: "모델 추출, 서비스거부 방어"
+    {
+        | enforceRateLimit
+          user info: "쿼리 레이트 제한 적용"
+          [Exponential(0.05)]
+          <- queryRateLimiting
+        # rateLimitEnforced @tag[M0004]
+            user info: "쿼리 레이트 제한 활성화"
+            -> enforceRateLimit
+    }
+
+    asset OutputObfuscation extends SecurityControl
+      user info: "출력 난독화 (AML.M0002)"
+      developer info: "모델 추출, 대리모델 생성 방어"
+    {
+        | obfuscateOutput
+          user info: "민감 정보 난독화"
+          <- outputObfuscation
+        # outputObfuscationEnabled @tag[M0002]
+            user info: "출력 난독화 활성화"
+            -> obfuscateOutput
+    }
+}
+
+category AttackSurfaces {
+    asset APIEndpoint
+      user info: "AI 모델 추론 API 엔드포인트"
+      developer info: "AML.T0040 - AI Model Inference API Access"
+    {
+        // AML.T0024.002 - Extract AI Model via API
+        // AML.T0034 - Cost Harvesting
+        // AML.T0029 - Denial of AI Service
+        | apiAccess
+          user info: "API 접근"
+          -> queryModel,
+             extractModel,
+             costHarvesting,
+             servicedenial
+        | queryModel
+          user info: "모델 쿼리"
+          [Exponential(0.1)]
+          -> receiveOutput
+        | extractModel
+          user info: "반복 쿼리로 모델 추출"
+          [Gamma(2, 15)]
+          -> proxyModel
+        | costHarvesting
+          user info: "비용 수확 (과도한 쿼리)"
+          [Exponential(0.05)]
+          -> incurCosts
+        | servicedenial
+          user info: "서비스거부 공격 (리소스 소진)"
+          [Exponential(0.03)]
+          -> denialOfService
+        # apiAuthentication @tag[M0019]
+            user info: "API 인증 및 인가"
+        & apiRateLimitEnforced @tag[M0004]
+            user info: "API 레이트 제한"
+            -> limitQueries
+    }
+
+    asset NetworkInterface
+      user info: "네트워크 인터페이스 (공격 진입점)"
+    {
+        | networkAccess
+          user info: "네트워크 접근"
+          -> eavesdrop,
+             mitm,
+             ddos
+        | eavesdrop
+          user info: "트래픽 도청"
+          [Gamma(1, 10)]
+          -> exfiltrateData
+        | mitm
+          user info: "중간자 공격 (MITM)"
+          [Gamma(1.5, 12)]
+          -> modifyData
+        | ddos
+          user info: "분산서비스거부 (DDoS)"
+          [Exponential(0.02)]
+          -> denialOfService
+        # encryptedTransport @tag[M0012]
+            user info: "TLS/HTTPS 암호화"
+    }
+}
+
+associations {
+    // Infrastructure Associations
+    VPCNetwork [vpc] 1 <-- Protects --> * [systems] AIModel
+    IAMRolePolicy [iam] 1 <-- Controls --> * [resources] DataManagement.AIData
+    KMSEncryption [kms] 1 <-- Encrypts --> * [data] DataManagement.AIData
+    MonitoringAndLogging [monitoring] 1 <-- Monitors --> * [systems] AIModel
+
+    // Data Management Associations
+    TrainingData [trainingData] * <-- UsedBy --> 1 [model] GenerativeLLM
+    ModelArtifacts [modelArtifacts] 1 <-- StoredIn --> * [storage] DataManagement.AIData
+    VectorDatabaseStorage [vectorDB] 1 <-- RetrievedFrom --> * [queries] RetrievalModule
+
+    // Core Services Associations
+    GenerativeLLM [llm] 1 <-- Uses --> * [retrieval] RetrievalModule
+    RetrievalModule [retrieval] 1 <-- Queries --> 1 [vectorDB] VectorDatabaseStorage
+    VectorEmbedding [embedding] 1 <-- Converts --> * [vectorDB] VectorDatabaseStorage
+    AgentOrchestrator [agent] 1 <-- Controls --> * [tools] ToolCapabilityModule
+    GenerativeLLM [llm] 1 <-- CallsBack --> 1 [agent] AgentOrchestrator
+
+    // User Interface Associations
+    UserInputProcessor [input] 1 <-- Receives --> * [users] APIEndpoint
+    UserInputProcessor [input] 1 <-- SendsTo --> 1 [llm] GenerativeLLM
+    OutputProcessor [output] 1 <-- ReceivesFrom --> 1 [llm] GenerativeLLM
+    OutputProcessor [output] 1 <-- SendsTo --> * [users] APIEndpoint
+    GuardRails [guardrails] * <-- Protects --> * [systems] CoreServices.AIModel
+
+    // Security Control Associations
+    AccessControl [access] 1 <-- Enforces --> * [resources] DataManagement.AIData
+    DataValidation [validation] 1 <-- Validates --> * [data] DataManagement.AIData
+    TelemetryLogging [telemetry] 1 <-- Monitors --> * [activities] APIEndpoint
+    AdversarialDetection [detection] 1 <-- Protects --> * [inputs] UserInterface.UserInputProcessor
+    QueryRateLimiting [rateLimit] 1 <-- Limits --> 1 [api] APIEndpoint
+    OutputObfuscation [obfuscation] 1 <-- Protects --> 1 [output] OutputProcessor
+
+    // Network & API Associations
+    APIEndpoint [api] 1 <-- ExposedOn --> 1 [network] NetworkInterface
+    APIEndpoint [api] 1 <-- Calls --> 1 [llm] GenerativeLLM
+    NetworkInterface [network] 1 <-- Connects --> * [vpcNetworks] VPCNetwork
+}
+
+// ==========================================
+// Validation Summary (Step 6)
+// ==========================================
+// ✅ Attack Steps: 40+ (MITRE ATLAS 기법 매핑)
+// ✅ Defense Steps: 25+ (MITRE ATLAS Mitigation 매핑)
+// ✅ Inheritance: 7개 abstract asset 확장
+// ✅ Associations: 20+ (자산 간 관계)
+// ✅ Attack Step 의존성: 논리적 일관성 확인
+// ✅ Defense 영향: 공격 단계 차단/지연
+// ✅ 코드 모듈화: Category별 구분, 재사용 가능
+// ==========================================

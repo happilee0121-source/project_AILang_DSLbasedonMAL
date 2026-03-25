@@ -1,0 +1,1060 @@
+// ============================================================================
+// AI Lang v0.1 - MAL DSL for Generative AI & Agentic AI Systems
+// Based on: MITRE ATLAS v5.4, OWASP Top 10 for LLM 2025,
+//           OWASP Securing Agentic Applications Guide 1.0,
+//           ISO/IEC 5339:2024, STRIDE+DFD Analysis
+// ============================================================================
+
+#id: "org.ailang.agenticai"
+#version: "0.1.0"
+
+// ============================================================================
+// Category 1: Foundation - 기본 AI 자산
+// ============================================================================
+category Foundation {
+
+  abstract asset AIComponent
+    user info: "모든 AI 구성요소의 공통 기반 자산"
+  {
+    | physicalAccess
+      user info: "물리적 접근 획득"
+      -> connect
+
+    | connect
+      user info: "네트워크 또는 논리적 연결 수립"
+      -> access
+
+    | access
+      user info: "자산에 대한 접근 획득"
+      -> discover
+
+    | discover
+      user info: "자산 정보 탐색"
+
+    // AML.T0049 - Exploit Public-Facing Application
+    | exploitPublicFacingApp [Exponential(0.05)]
+      user info: "공개된 애플리케이션의 취약점을 악용하여 초기 접근 획득"
+      -> access
+
+    // AML.T0012 - Valid Accounts
+    | useValidAccounts
+      user info: "탈취한 유효 계정 자격증명으로 접근"
+      -> access,
+         privilegeEscalation
+
+    // AML.T0012 - Valid Accounts (Privilege Escalation)
+    | privilegeEscalation
+      user info: "권한 상승을 통해 높은 권한 획득"
+
+    // AML.M0019 - Control Access to AI Models and Data in Production
+    # productionAccessControl
+      user info: "프로덕션 환경의 AI 모델 및 데이터 접근제어"
+      -> access
+
+    // AML.M0024 - AI Telemetry Logging
+    # telemetryLogging
+      user info: "AI 텔레메트리 로깅을 통한 이상 활동 탐지"
+      -> discover
+  }
+
+  abstract asset AIModel extends AIComponent
+    user info: "모든 AI 모델의 추상 기반 (LLM, SLM, 멀티모달 등)"
+  {
+    // AML.T0014 - Discover AI Model Family
+    | discoverModelFamily [Exponential(0.1)]
+      user info: "모델 계열(아키텍처) 식별"
+      -> craftAdversarialData
+
+    // AML.T0013 - Discover AI Model Ontology
+    | discoverModelOntology [Exponential(0.1)]
+      user info: "모델 출력 공간(온톨로지) 탐색"
+      -> craftAdversarialData
+
+    // AML.T0063 - Discover AI Model Outputs
+    | discoverModelOutputs
+      user info: "모델 출력(클래스 점수 등)을 로그/API 응답에서 발견"
+      -> craftAdversarialData,
+         extractModel
+
+    // AML.T0043 - Craft Adversarial Data
+    | craftAdversarialData [Gamma(1.5, 15)]
+      user info: "모델을 기만하기 위한 적대적 데이터 생성"
+      -> evadeModel,
+         erodeIntegrity
+
+    // AML.T0015 - Evade AI Model
+    | evadeModel
+      user info: "적대적 데이터로 모델 탐지/분류 회피"
+
+    // AML.T0031 - Erode AI Model Integrity
+    | erodeIntegrity
+      user info: "적대적 입력으로 모델 성능 점진적 저하"
+
+    // AML.T0018 - Manipulate AI Model
+    | manipulateModel
+      user info: "모델 가중치/아키텍처를 직접 변경하여 행동 조작"
+      -> poisonModel,
+         modifyArchitecture,
+         embedMalware
+
+    // AML.T0018.000 - Poison AI Model
+    | poisonModel [Gamma(2.0, 20)]
+      user info: "모델 가중치를 조작하여 백도어 또는 편향 삽입"
+
+    // AML.T0018.001 - Modify AI Model Architecture
+    | modifyArchitecture
+      user info: "모델 아키텍처(레이어 추가/삭제)를 변경하여 행동 재정의"
+
+    // AML.T0018.002 - Embed Malware
+    | embedMalware
+      user info: "모델 파일(pickle 등)에 악성 코드 삽입"
+
+    // AML.T0024 - Exfiltration via AI Inference API
+    | exfiltrateViaInferenceAPI
+      user info: "추론 API를 통해 학습 데이터/모델 정보 유출"
+      -> inferTrainingDataMembership,
+         invertModel,
+         extractModel
+
+    // AML.T0024.000 - Infer Training Data Membership
+    | inferTrainingDataMembership [Gamma(1.5, 10)]
+      user info: "학습 데이터 멤버십을 추론하여 개인정보 유출"
+
+    // AML.T0024.001 - Invert AI Model
+    | invertModel [Gamma(2.0, 20)]
+      user info: "추론 API 신뢰도 점수를 악용하여 학습 데이터 재구성"
+
+    // AML.T0024.002 - Extract AI Model
+    | extractModel [Gamma(2.0, 30)]
+      user info: "반복 쿼리로 모델의 기능적 복사본 추출"
+
+    // AML.T0029 - Denial of AI Service
+    | denialOfService
+      user info: "대량의 요청으로 AI 서비스 가용성 저하"
+
+    // AML.T0034 - Cost Harvesting
+    | costHarvesting
+      user info: "고비용 쿼리를 전송하여 운영 비용 증가 유발"
+
+    // AML.T0005 - Create Proxy AI Model
+    | createProxyModel [Gamma(2.0, 25)]
+      user info: "대상 모델의 프록시 모델을 생성하여 오프라인 공격 준비"
+      -> craftAdversarialData
+
+    // AML.M0006 - Use Ensemble Methods
+    # ensembleMethods
+      user info: "다중 모델 앙상블로 단일 모델 공격 효과 감소"
+      -> evadeModel,
+         erodeIntegrity,
+         discoverModelFamily
+
+    // AML.M0003 - Model Hardening
+    # modelHardening
+      user info: "모델 경량화/강건화로 적대적 입력에 대한 내성 강화"
+      -> evadeModel,
+         erodeIntegrity
+
+    // AML.M0008 - Validate AI Model
+    # validateModel
+      user info: "광범위한 적대적 입력에 대해 모델 검증"
+      -> poisonModel,
+         manipulateModel,
+         craftAdversarialData
+
+    // AML.M0002 - Passive AI Output Obfuscation
+    # outputObfuscation
+      user info: "모델 출력 난독화로 정보 추출 방지"
+      -> extractModel,
+         invertModel,
+         inferTrainingDataMembership,
+         createProxyModel,
+         discoverModelOutputs
+
+    // AML.M0004 - Restrict Number of AI Model Queries
+    # queryRateLimiting
+      user info: "모델 쿼리 수 제한으로 추출/DoS 공격 방지"
+      -> extractModel,
+         createProxyModel,
+         denialOfService,
+         costHarvesting,
+         discoverModelFamily
+
+    // AML.M0017 - AI Model Distribution Methods
+    # secureDistribution
+      user info: "엣지 배포 회피 등 안전한 모델 배포 방식 적용"
+      -> extractModel,
+         discoverModelOutputs
+
+    // AML.M0015 - Adversarial Input Detection
+    # adversarialInputDetection
+      user info: "적대적 입력 탐지 메커니즘 적용"
+      -> evadeModel,
+         erodeIntegrity,
+         denialOfService
+
+    // AML.M0010 - Input Restoration
+    # inputRestoration
+      user info: "입력 전처리를 통한 적대적 데이터 복원/정화"
+      -> erodeIntegrity
+  }
+}
+
+// ============================================================================
+// Category 2: GenerativeAI - 생성형 AI 자산
+// ============================================================================
+category GenerativeAI {
+
+  asset LargeLanguageModel extends Foundation.AIModel
+    user info: "대규모 언어 모델 (GPT, Claude, Gemini 등)"
+  {
+    // AML.T0051 - LLM Prompt Injection
+    | promptInjection
+      user info: "악의적 프롬프트로 LLM 행동을 의도치 않게 변경"
+      -> directPromptInjection,
+         indirectPromptInjection,
+         triggeredPromptInjection
+
+    // AML.T0051.000 - Direct Prompt Injection
+    | directPromptInjection
+      user info: "사용자가 직접 악성 프롬프트를 입력하여 시스템 지침 우회"
+      -> jailbreak,
+         dataLeakage,
+         extractSystemPrompt
+
+    // AML.T0051.001 - Indirect Prompt Injection
+    | indirectPromptInjection
+      user info: "외부 데이터 소스(웹, DB)에 숨겨진 프롬프트가 LLM에 의해 처리됨"
+      -> jailbreak,
+         dataLeakage,
+         agentToolInvocation
+
+    // AML.T0051.002 - Triggered Prompt Injection
+    | triggeredPromptInjection
+      user info: "사용자 액션/이벤트에 의해 트리거되는 프롬프트 주입"
+      -> jailbreak,
+         agentToolInvocation
+
+    // AML.T0054 - LLM Jailbreak
+    | jailbreak
+      user info: "LLM의 안전 제약/가드레일을 우회하여 무제한 응답 유도"
+      -> dataLeakage,
+         generateMaliciousCommands
+
+    // AML.T0057 - LLM Data Leakage
+    | dataLeakage
+      user info: "민감한 사용자/학습 데이터 유출을 유도하는 프롬프트"
+
+    // AML.T0056 - Extract LLM System Prompt
+    | extractSystemPrompt
+      user info: "시스템 프롬프트를 추출하여 지적재산 탈취 또는 우회 공격 준비"
+
+    // AML.T0069 - Discover LLM System Information
+    | discoverSystemInfo
+      user info: "LLM 시스템 정보(도구, 키워드, 구분자) 탐색"
+      -> discoverSpecialCharSets,
+         discoverSystemKeywords,
+         discoverSystemPrompt
+
+    // AML.T0069.000 - Special Character Sets
+    | discoverSpecialCharSets
+      user info: "RAG 구분자 등 LLM에서 사용하는 특수 문자 세트 발견"
+      -> promptInjection
+
+    // AML.T0069.001 - System Instruction Keywords
+    | discoverSystemKeywords
+      user info: "LLM에 특별한 의미를 갖는 키워드(함수명, 도구명) 발견"
+      -> promptInjection,
+         agentToolInvocation
+
+    // AML.T0069.002 - System Prompt
+    | discoverSystemPrompt
+      user info: "시스템 프롬프트 내용을 발견하여 가드레일 우회 가능성 파악"
+      -> extractSystemPrompt
+
+    // AML.T0061 - LLM Prompt Self-Replication
+    | promptSelfReplication
+      user info: "자기 복제 프롬프트로 다른 LLM/세션에 전파"
+      -> jailbreak,
+         dataLeakage
+
+    // AML.T0062 - Discover LLM Hallucinations
+    | discoverHallucinations
+      user info: "LLM이 생성하는 환각(존재하지 않는 패키지명 등) 탐지"
+      -> publishHallucinatedEntities
+
+    // AML.T0060 - Publish Hallucinated Entities
+    | publishHallucinatedEntities
+      user info: "환각된 패키지/URL/이메일을 실제 악성 엔티티로 등록"
+
+    // AML.T0065 - LLM Prompt Crafting
+    | promptCrafting
+      user info: "대상 시스템의 방어를 우회하는 프롬프트를 정교하게 제작"
+      -> promptInjection
+
+    // AML.T0068 - LLM Prompt Obfuscation
+    | promptObfuscation
+      user info: "Base64, 다국어 등으로 프롬프트를 난독화하여 가드레일 우회"
+      -> promptInjection
+
+    // AML.T0067 - LLM Trusted Output Components Manipulation
+    | manipulateTrustedOutputs
+      user info: "LLM 응답의 신뢰 구성요소(인용, 링크 등)를 조작"
+
+    // AML.T0067.000 - Citations
+    | manipulateCitations
+      user info: "LLM 응답의 인용 정보를 조작하여 신뢰성 위장"
+
+    // AML.T0077 - LLM Response Rendering
+    | responseRendering
+      user info: "렌더링되는 이미지/마크다운으로 비공개 정보 유출"
+
+    // AML.T0094 - Delay Execution of LLM Instructions
+    | delayExecution
+      user info: "향후 이벤트에 대응하는 지연 실행 지시로 보안 검사 우회"
+      -> promptInjection
+
+    // AML.T0092 - Manipulate User LLM Chat History
+    | manipulateChatHistory
+      user info: "사용자 채팅 기록 삭제/편집으로 악성 행위 은폐"
+
+    // AML.T0102 - Generate Malicious Commands
+    | generateMaliciousCommands
+      user info: "LLM을 이용해 악성 명령어를 동적 생성"
+
+    // AML.T0088 - Generate Deepfakes
+    | generateDeepfakes
+      user info: "합성 미디어(이미지, 비디오, 오디오)를 생성하여 사칭/회피"
+
+    // AML.T0053 - AI Agent Tool Invocation
+    | agentToolInvocation
+      user info: "LLM을 통해 연결된 도구/API를 악용하여 권한 상승"
+
+    // AML.M0020 - Generative AI Guardrails
+    # guardrails
+      user info: "입출력 가드레일로 유해 프롬프트/응답 차단"
+      -> promptInjection,
+         jailbreak,
+         dataLeakage,
+         extractSystemPrompt,
+         promptSelfReplication,
+         discoverHallucinations
+
+    // AML.M0021 - Generative AI Guidelines
+    # modelGuidelines
+      user info: "모델 지침으로 안전하지 않은 입력 거부 유도"
+      -> dataLeakage,
+         promptSelfReplication,
+         discoverHallucinations
+
+    // AML.M0022 - Generative AI Model Alignment
+    # modelAlignment
+      user info: "모델 정렬을 통한 파라메트릭 안전성 향상"
+      -> dataLeakage,
+         promptSelfReplication,
+         discoverHallucinations
+
+    // AML.M0033 - Input and Output Validation for AI Agent Components
+    # agentIOValidation
+      user info: "에이전트 컴포넌트 입출력 검증으로 주입 공격 방지"
+      -> triggeredPromptInjection,
+         agentToolInvocation
+
+    // AML.M0034 - Deepfake Detection
+    # deepfakeDetection
+      user info: "딥페이크 탐지를 통한 생성 콘텐츠 차단"
+      -> generateDeepfakes,
+         evadeModel
+  }
+
+  asset MultimodalLLM extends LargeLanguageModel
+    user info: "멀티모달 대규모 언어 모델 (이미지+텍스트+오디오 처리)"
+  {
+    | multimodalInjection
+      user info: "이미지/오디오에 숨겨진 악성 지시로 크로스모달 공격"
+      +> promptInjection
+  }
+
+  asset FineTunedModel extends LargeLanguageModel
+    user info: "파인튜닝된 언어 모델 (LoRA, PEFT 등)"
+  {
+    | loraAdapterCompromise
+      user info: "악성 LoRA 어댑터로 기본 모델의 보안 기능 무력화"
+      +> manipulateModel
+  }
+
+  asset SmallLanguageModel extends Foundation.AIModel
+    user info: "소규모 언어 모델 (온디바이스, 경량 모델)"
+  {
+    | onDeviceExtraction
+      user info: "엣지 디바이스에 배포된 모델의 물리적 추출"
+      -> extractModel
+  }
+}
+
+// ============================================================================
+// Category 3: DataLayer - 데이터 계층 자산
+// ============================================================================
+category DataLayer {
+
+  asset TrainingData extends Foundation.AIComponent
+    user info: "AI 모델 학습에 사용되는 데이터셋 (사전학습, 파인튜닝, 임베딩)"
+  {
+    // AML.T0020 - Poison Training Data
+    | poisonTrainingData [Gamma(2.0, 20)]
+      user info: "학습 데이터를 조작하여 모델에 백도어/편향 삽입"
+
+    // AML.T0019 - Publish Poisoned Datasets
+    | publishPoisonedDatasets
+      user info: "중독된 데이터셋을 공개 위치에 게시"
+      -> poisonTrainingData
+
+    // AML.T0059 - Erode Dataset Integrity
+    | erodeDatasetIntegrity
+      user info: "데이터셋 일부를 조작하여 유용성과 신뢰 감소"
+
+    // AML.M0007 - Sanitize Training Data
+    # sanitizeData
+      user info: "학습 데이터 검증 및 정화로 포이즈닝 방지"
+      -> poisonTrainingData,
+         erodeDatasetIntegrity
+
+    // AML.M0025 - Maintain AI Dataset Provenance
+    # datasetProvenance
+      user info: "데이터셋 출처 추적으로 변조 탐지"
+      -> poisonTrainingData,
+         erodeDatasetIntegrity,
+         publishPoisonedDatasets
+  }
+
+  asset VectorDatabase extends Foundation.AIComponent
+    user info: "벡터 임베딩 저장소 (Milvus, Pinecone, FAISS 등)"
+  {
+    let connectedModels = retrievalModule.llm
+
+    // AML.T0070 - RAG Poisoning
+    | ragPoisoning [Gamma(1.5, 10)]
+      user info: "RAG 인덱스에 악성 콘텐츠를 주입하여 검색 결과 오염"
+      -> falseRAGEntryInjection
+
+    // AML.T0071 - False RAG Entry Injection
+    | falseRAGEntryInjection
+      user info: "RAG DB에 위조 문서 항목을 삽입하여 LLM 기만"
+      -> connectedModels().indirectPromptInjection
+
+    // AML.T0082 - RAG Credential Harvesting
+    | ragCredentialHarvesting
+      user info: "RAG DB에 포함된 내부 문서에서 자격증명 수집"
+
+    // AML.T0085.000 - Data from AI Services: RAG Databases
+    | collectFromRAGDB
+      user info: "RAG DB에서 조직 내부 문서 데이터 수집"
+
+    | unauthorizedAccess
+      user info: "접근 제어 미비로 벡터 DB에 무단 접근"
+      -> ragPoisoning,
+         collectFromRAGDB,
+         ragCredentialHarvesting
+
+    // AML.T0064 - Gather RAG-Indexed Targets
+    | gatherRAGTargets
+      user info: "RAG 시스템이 인덱싱하는 데이터 소스 식별"
+      -> ragPoisoning
+
+    // AML.M0026 - Privileged AI Agent Permissions Configuration
+    # privilegedPermissions
+      user info: "권한 있는 AI 에이전트의 접근 제어 설정"
+      -> ragCredentialHarvesting,
+         collectFromRAGDB
+
+    // AML.M0027 - Single-User AI Agent Permissions Configuration
+    # singleUserPermissions
+      user info: "사용자 권한 상속 기반 에이전트 접근 제어"
+      -> ragCredentialHarvesting,
+         collectFromRAGDB
+
+    // AML.M0032 - Segmentation of AI Agent Components
+    # agentSegmentation
+      user info: "에이전트 컴포넌트 분리로 RAG DB 접근 범위 제한"
+      -> collectFromRAGDB,
+         ragCredentialHarvesting
+  }
+
+  asset EmbeddingModel extends Foundation.AIModel
+    user info: "텍스트를 벡터로 변환하는 임베딩 모델"
+  {
+    | embeddingManipulation
+      user info: "임베딩 모델을 조작하여 검색 결과 왜곡"
+      -> vectorDB.ragPoisoning
+
+    // AML.M0009 - Use Multi-Modal Sensors
+    # multiModalSensors
+      user info: "다중 모달 센서 사용으로 단일 모달 공격 방지"
+      -> evadeModel
+  }
+
+  asset RetrievalModule extends Foundation.AIComponent
+    user info: "RAG 시스템의 검색 모듈 (쿼리→벡터DB→LLM 컨텍스트)"
+  {
+    // AML.T0066 - Retrieval Content Crafting
+    | retrievalContentCrafting
+      user info: "사용자 쿼리에 의해 검색되도록 설계된 악성 콘텐츠 작성"
+      -> vectorDB.ragPoisoning,
+         llm.indirectPromptInjection
+
+    | contextInjection
+      user info: "검색된 컨텍스트에 악성 지시 포함"
+      -> llm.indirectPromptInjection
+
+    | crossTenantLeakage
+      user info: "멀티테넌트 환경에서 타 사용자/그룹의 임베딩 유출"
+  }
+}
+
+// ============================================================================
+// Category 4: AgenticAI - 에이전틱 AI 자산
+// ============================================================================
+category AgenticAI {
+
+  asset AIAgent extends Foundation.AIComponent
+    user info: "자율적으로 도구를 호출하고 작업을 수행하는 AI 에이전트"
+  {
+    let allTools = tools
+    let allMemory = memory
+
+    // AML.T0053 - AI Agent Tool Invocation
+    | toolInvocation
+      user info: "에이전트를 통해 연결된 도구/API를 악의적으로 호출"
+      -> allTools().maliciousInvocation,
+         exfiltrateViaToolInvocation,
+         dataDestructionViaTool
+
+    // AML.T0086 - Exfiltration via AI Agent Tool Invocation
+    | exfiltrateViaToolInvocation
+      user info: "도구의 쓰기 작업(이메일, 문서)으로 민감 데이터 유출"
+
+    // AML.T0101 - Data Destruction via AI Agent Tool Invocation
+    | dataDestructionViaTool
+      user info: "도구의 변경 작업으로 데이터 삭제/파괴"
+
+    // AML.T0080 - AI Agent Context Poisoning
+    | contextPoisoning
+      user info: "에이전트의 LLM 컨텍스트를 조작하여 행동 변경 지속"
+      -> memoryPoisoning,
+         threadPoisoning
+
+    // AML.T0080.000 - Memory Poisoning
+    | memoryPoisoning
+      user info: "LLM 메모리에 악성 지시/선호를 주입하여 세션 간 지속"
+      -> allMemory().corrupt
+
+    // AML.T0080.001 - Thread Poisoning
+    | threadPoisoning
+      user info: "채팅 스레드에 악성 지시를 삽입하여 스레드 내 지속"
+
+    // AML.T0081 - Modify AI Agent Configuration
+    | modifyConfiguration
+      user info: "에이전트 설정 파일 변경 (시스템 프롬프트, 도구 설정, 보안 비활성화)"
+      -> contextPoisoning,
+         toolInvocation
+
+    // AML.T0084 - Discover AI Agent Configuration
+    | discoverConfiguration
+      user info: "에이전트 설정 정보 (도구, 트리거, 지식) 탐색"
+      -> discoverEmbeddedKnowledge,
+         discoverToolDefinitions,
+         discoverActivationTriggers
+
+    // AML.T0084.000 - Embedded Knowledge
+    | discoverEmbeddedKnowledge
+      user info: "에이전트가 접근할 수 있는 데이터 소스/지식 탐색"
+
+    // AML.T0084.001 - Tool Definitions
+    | discoverToolDefinitions
+      user info: "에이전트가 사용할 수 있는 도구 목록 식별"
+      -> toolInvocation
+
+    // AML.T0084.002 - Activation Triggers
+    | discoverActivationTriggers
+      user info: "에이전트를 활성화하는 키워드/이벤트 발견"
+
+    // AML.T0083 - Credentials from AI Agent Configuration
+    | credentialsFromConfig
+      user info: "에이전트 설정에서 API 키, 토큰, 연결 문자열 추출"
+
+    // AML.T0085 - Data from AI Services
+    | collectFromAIServices
+      user info: "AI 서비스를 통해 조직의 민감 정보 수집"
+      -> collectFromAgentTools
+
+    // AML.T0085.001 - AI Agent Tools
+    | collectFromAgentTools
+      user info: "에이전트 도구를 통해 각종 API/서비스 데이터 수집"
+
+    // AML.T0099 - AI Agent Tool Data Poisoning
+    | toolDataPoisoning
+      user info: "에이전트 도구가 접근하는 위치에 악성 콘텐츠 배치"
+
+    // AML.T0100 - AI Agent Clickbait
+    | agentClickbait
+      user info: "웹 브라우징 에이전트를 속여 악성 코드 실행 유도"
+
+    // AML.T0103 - Deploy AI Agent
+    | deployMaliciousAgent
+      user info: "적대자가 피해 환경에 악성 AI 에이전트를 배포"
+      -> toolInvocation
+
+    // AML.T0108 - AI Agent (C2)
+    | agentC2
+      user info: "AI 에이전트를 C2 채널로 악용하여 명령 전달"
+
+    // AML.T0105 - Escape to Host
+    | escapeToHost
+      user info: "컨테이너/샌드박스에서 호스트 환경으로 탈출"
+
+    // AML.T0046 - Spamming AI System with Chaff Data
+    | spamWithChaffData
+      user info: "대량의 저중요도 이벤트로 HITL 검토자를 압도"
+
+    // AML.M0028 - AI Agent Tools Permissions Configuration
+    # toolsPermissions
+      user info: "에이전트 도구에 사용자/에이전트 접근 제어 상속 설정"
+      -> toolInvocation,
+         exfiltrateViaToolInvocation,
+         dataDestructionViaTool,
+         collectFromAgentTools
+
+    // AML.M0029 - Human In-the-Loop for AI Agent Actions
+    # humanInTheLoop
+      user info: "고위험 작업에 대한 인간 승인 요구"
+      -> dataDestructionViaTool,
+         toolInvocation
+
+    // AML.M0030 - Restrict AI Agent Tool Invocation on Untrusted Data
+    # restrictUntrustedToolInvocation
+      user info: "신뢰할 수 없는 데이터가 존재할 때 자동 도구 호출 제한"
+      -> dataDestructionViaTool,
+         toolInvocation
+
+    // AML.M0031 - Memory Hardening
+    # memoryHardening
+      user info: "LLM 메모리 보호로 조작 방지 및 중독된 메모리 실행 차단"
+      -> memoryPoisoning
+
+    // AML.M0032 - Segmentation of AI Agent Components
+    # componentSegmentation
+      user info: "에이전트 컴포넌트 분리로 도구 악용 범위 제한"
+      -> toolInvocation,
+         exfiltrateViaToolInvocation,
+         collectFromAgentTools
+  }
+
+  asset AgentMemory extends Foundation.AIComponent
+    user info: "에이전트의 단기/장기 메모리 (벡터 DB, 캐시 등)"
+  {
+    | corrupt
+      user info: "메모리 내용 조작으로 에이전트 행동 변경"
+
+    | leakData
+      user info: "메모리에서 세션 간 민감 정보 유출"
+
+    | crossSessionLeak
+      user info: "크로스 세션 메모리에서 다른 세션의 정보 접근"
+
+    | crossAgentLeak
+      user info: "크로스 에이전트 메모리에서 다른 에이전트의 정보 접근"
+
+    // AML.M0031 - Memory Hardening
+    # hardened
+      user info: "메모리 하드닝으로 조작/유출 방지"
+      -> corrupt,
+         leakData
+  }
+
+  asset AgentTool extends Foundation.AIComponent
+    user info: "에이전트가 호출할 수 있는 외부 도구/API/함수"
+  {
+    | maliciousInvocation
+      user info: "도구가 의도치 않은 방식으로 호출됨"
+
+    // AML.T0098 - AI Agent Tool Credential Harvesting
+    | credentialHarvesting
+      user info: "도구가 접근하는 소스(SharePoint, GitHub 등)에서 자격증명 수집"
+
+    // AML.T0011.002 - Poisoned AI Agent Tool
+    | poisonedTool
+      user info: "중독된 도구가 프롬프트 주입 또는 악성 동작 실행"
+      -> agent.contextPoisoning,
+         agent.toolInvocation
+
+    // AML.T0104 - Publish Poisoned AI Agent Tool
+    | publishPoisonedTool
+      user info: "악성 에이전트 도구를 공개 레지스트리에 게시"
+      -> poisonedTool
+
+    // AML.M0028 - AI Agent Tools Permissions Configuration
+    # toolAccessControl
+      user info: "도구 접근제어로 악용 범위 제한"
+      -> maliciousInvocation,
+         credentialHarvesting
+
+    // AML.M0032 - Segmentation of AI Agent Components
+    # segmentation
+      user info: "도구 분리로 타 컴포넌트 영향 방지"
+      -> credentialHarvesting,
+         maliciousInvocation
+  }
+
+  asset Orchestrator extends Foundation.AIComponent
+    user info: "멀티에이전트 시스템의 오케스트레이터 (태스크 분배, 결과 통합)"
+  {
+    | goalManipulation
+      user info: "오케스트레이터의 목표/계획을 조작하여 에이전트 행동 변경"
+      -> agents.contextPoisoning
+
+    | identityConfusion
+      user info: "에이전트 간 신원 혼동으로 권한 오용"
+
+    | communicationPoisoning
+      user info: "에이전트 간 메시징을 오염시켜 조율 방해"
+      -> agents.contextPoisoning
+
+    | rogueAgent
+      user info: "악의적/손상된 에이전트가 오케스트레이션을 침해"
+  }
+}
+
+// ============================================================================
+// Category 5: SupplyChain - 공급망 자산
+// ============================================================================
+category SupplyChain {
+
+  asset AISupplyChain extends Foundation.AIComponent
+    user info: "AI 시스템의 소프트웨어/데이터/모델 공급망"
+  {
+    // AML.T0010 - AI Supply Chain Compromise
+    | supplyChainCompromise
+      user info: "AI 공급망(소프트웨어, 데이터, 모델, 컨테이너)을 타협"
+      -> softwareCompromise,
+         dataCompromise,
+         modelCompromise,
+         containerCompromise
+
+    // AML.T0010.001 - AI Software
+    | softwareCompromise
+      user info: "AI 소프트웨어(PyTorch, LangChain, MCP 서버 등) 패키지 타협"
+
+    // AML.T0010.002 - Data
+    | dataCompromise
+      user info: "학습/검증 데이터 공급망 타협"
+      -> trainingData.poisonTrainingData
+
+    // AML.T0010.003 - Model
+    | modelCompromise
+      user info: "사전학습 모델 공급망 타협"
+
+    // AML.T0010.004 - Container Registry
+    | containerCompromise
+      user info: "컨테이너 이미지 레지스트리 타협"
+
+    // AML.T0058 - Publish Poisoned Models
+    | publishPoisonedModels
+      user info: "중독된 모델을 공개 레지스트리에 게시"
+      -> modelCompromise
+
+    // AML.T0011 - User Execution
+    | userExecution
+      user info: "사용자가 악성 AI 아티팩트를 실행하도록 유도"
+      -> unsafeArtifacts,
+         maliciousPackage,
+         poisonedAgentTool,
+         maliciousLink
+
+    // AML.T0011.000 - Unsafe AI Artifacts
+    | unsafeArtifacts
+      user info: "직렬화(pickle 등)를 악용한 안전하지 않은 AI 아티팩트 실행"
+
+    // AML.T0011.001 - Malicious Package
+    | maliciousPackage
+      user info: "AI 관련 악성 패키지 설치 유도"
+
+    // AML.T0011.002 - Poisoned AI Agent Tool
+    | poisonedAgentTool
+      user info: "중독된 AI 에이전트 도구 실행"
+
+    // AML.T0011.003 - Malicious Link
+    | maliciousLink
+      user info: "악성 링크를 통한 코드 실행 유도"
+
+    // AML.M0014 - Verify AI Artifacts
+    # verifyArtifacts
+      user info: "서명 검증으로 안전하지 않은 AI 아티팩트 도입 방지"
+      -> unsafeArtifacts,
+         supplyChainCompromise,
+         maliciousPackage
+
+    // AML.M0013 - Code Signing
+    # codeSigning
+      user info: "코드 서명으로 소프트웨어/모델 무결성 보장"
+      -> softwareCompromise,
+         modelCompromise,
+         unsafeArtifacts,
+         maliciousPackage
+
+    // AML.M0023 - AI Bill of Materials
+    # aiBOM
+      user info: "AI BOM으로 공급망 구성요소의 가시성 확보"
+      -> supplyChainCompromise,
+         userExecution,
+         maliciousPackage,
+         publishPoisonedModels
+
+    // AML.M0016 - Vulnerability Scanning
+    # vulnerabilityScanning
+      user info: "취약점 스캐닝으로 악성 바이너리/아티팩트 탐지"
+      -> userExecution,
+         unsafeArtifacts,
+         maliciousPackage
+
+    // AML.M0011 - Restrict Library Loading
+    # restrictLibraryLoading
+      user info: "외부 라이브러리 로딩 제한으로 악성 코드 실행 방지"
+      -> userExecution,
+         unsafeArtifacts,
+         maliciousPackage
+
+    // AML.M0018 - User Training
+    # userTraining
+      user info: "사용자 교육으로 사회공학/악성 아티팩트 인식 강화"
+      -> userExecution,
+         unsafeArtifacts,
+         maliciousPackage
+  }
+}
+
+// ============================================================================
+// Category 6: Infrastructure - 인프라 자산
+// ============================================================================
+category Infrastructure {
+
+  asset ApplicationService extends Foundation.AIComponent
+    user info: "AI 애플리케이션의 공개 서비스 인터페이스 (API, 웹 UI)"
+  {
+    // AML.T0040 - AI Model Inference API Access
+    | inferenceAPIAccess
+      user info: "추론 API를 통한 정당한 접근으로 공격 수행"
+      -> llm.discoverModelFamily,
+         llm.discoverModelOntology,
+         llm.exfiltrateViaInferenceAPI,
+         llm.craftAdversarialData
+
+    // AML.T0093 - Prompt Infiltration via Public-Facing Application
+    | promptInfiltration
+      user info: "공개 앱(이메일, Jira, 공유 문서)을 통해 악성 프롬프트 침투"
+      -> llm.indirectPromptInjection,
+         vectorDB.ragPoisoning
+
+    // AML.T0078 - Drive-by Compromise
+    | driveByCompromise
+      user info: "웹사이트에 포함된 프롬프트 주입으로 AI 시스템 접근"
+      -> llm.indirectPromptInjection
+
+    // AML.T0096 - AI Service API (C2)
+    | aiServiceAPIAsC2
+      user info: "AI 서비스 API를 C2 채널로 악용하여 정상 트래픽에 명령 숨김"
+
+    // AML.T0075 - Cloud Service Discovery
+    | cloudServiceDiscovery
+      user info: "클라우드 AI 서비스(Bedrock, Vertex AI 등) 열거"
+      -> inferenceAPIAccess
+
+    // AML.T0052 - Phishing
+    | phishing
+      user info: "LLM 생성 피싱 메시지로 사용자 자격증명 탈취"
+
+    // AML.T0052.000 - Spearphishing via Social Engineering LLM
+    | spearphishingViaSocialEngLLM
+      user info: "LLM을 표적형 사회공학 도구로 악용"
+      -> phishing
+  }
+
+  asset AIInfrastructure extends Foundation.AIComponent
+    user info: "AI 시스템의 기반 인프라 (GPU 클러스터, 클라우드, 네트워크)"
+  {
+    // AML.T0050 - Command and Scripting Interpreter
+    | commandExecution
+      user info: "명령/스크립트 인터프리터를 악용하여 임의 명령 실행"
+
+    // AML.T0072 - Reverse Shell
+    | reverseShell
+      user info: "역방향 셸을 통한 피해 시스템 원격 제어"
+
+    // AML.T0055 - Unsecured Credentials
+    | unsecuredCredentials
+      user info: "시스템에서 안전하지 않게 저장된 자격증명 수집"
+
+    // AML.T0090 - OS Credential Dumping
+    | osCredentialDumping
+      user info: "OS 캐시/메모리에서 자격증명 추출"
+
+    // AML.T0091 - Use Alternate Authentication Material
+    | useAlternateAuth
+      user info: "토큰, 해시, 커버로스 티켓 등 대체 인증 자료 사용"
+      -> applicationAccessToken
+
+    // AML.T0091.000 - Application Access Token
+    | applicationAccessToken
+      user info: "도난된 애플리케이션 액세스 토큰으로 API 접근"
+
+    // AML.T0089 - Process Discovery
+    | processDiscovery
+      user info: "실행 중인 AI 관련 프로세스 정보 수집"
+
+    // AML.T0097 - Virtualization/Sandbox Evasion
+    | sandboxEvasion
+      user info: "가상화/샌드박스 환경 탐지 및 회피"
+
+    // AML.T0037 - Data from Local System
+    | dataFromLocalSystem
+      user info: "로컬 파일시스템에서 AI 관련 민감 데이터 수집"
+
+    // AML.T0036 - Data from Information Repositories
+    | dataFromInfoRepos
+      user info: "SharePoint, Confluence 등 정보 저장소에서 데이터 수집"
+
+    // AML.T0025 - Exfiltration via Cyber Means
+    | exfiltrateViaCyber
+      user info: "전통적 사이버 수단으로 AI 아티팩트 유출"
+
+    // AML.T0035 - AI Artifact Collection
+    | aiArtifactCollection
+      user info: "유출 또는 공격 준비를 위한 AI 아티팩트 수집"
+
+    // AML.T0073 - Impersonation
+    | impersonation
+      user info: "신뢰할 수 있는 사람/조직을 사칭하여 공격"
+
+    // AML.T0074 - Masquerading
+    | masquerading
+      user info: "아티팩트의 속성을 조작하여 합법적으로 위장"
+
+    // AML.T0076 - Corrupt AI Model
+    | corruptModelFile
+      user info: "모델 파일을 의도적으로 손상시켜 스캐너 회피"
+
+    // AML.T0106 - Exploitation for Credential Access
+    | exploitForCredentials
+      user info: "소프트웨어 취약점을 악용하여 자격증명 획득"
+
+    // AML.T0107 - Exploitation for Defense Evasion
+    | exploitForDefenseEvasion
+      user info: "보안 소프트웨어 취약점을 악용하여 방어 우회"
+
+    // AML.M0005 - Control Access to AI Models and Data at Rest
+    # accessControlAtRest
+      user info: "저장된 AI 모델/데이터에 대한 접근 제어"
+      -> aiArtifactCollection,
+         exfiltrateViaCyber,
+         unsecuredCredentials
+
+    // AML.M0012 - Encrypt Sensitive Information
+    # encryptSensitiveInfo
+      user info: "민감 AI 아티팩트 암호화"
+      -> aiArtifactCollection,
+         dataFromLocalSystem
+  }
+}
+
+// ============================================================================
+// Category 7: ExternalHarms - 외부 피해
+// ============================================================================
+category ExternalHarms {
+
+  asset ExternalImpact extends Foundation.AIComponent
+    user info: "AI 시스템 악용으로 인한 외부 피해"
+  {
+    // AML.T0048 - External Harms
+    | externalHarms
+      user info: "AI 시스템 리소스를 악용하여 조직/사용자/사회에 외부 피해"
+      -> financialHarm,
+         reputationalHarm,
+         societalHarm,
+         userHarm,
+         ipTheft
+
+    // AML.T0048.000 - Financial Harm
+    | financialHarm
+      user info: "사기, 위조 등으로 인한 재정적 피해"
+
+    // AML.T0048.001 - Reputational Harm
+    | reputationalHarm
+      user info: "스캔들, 위조 사칭 등으로 인한 평판 손상"
+
+    // AML.T0048.002 - Societal Harm
+    | societalHarm
+      user info: "공공/취약 계층에 유해한 콘텐츠 노출"
+
+    // AML.T0048.003 - User Harm
+    | userHarm
+      user info: "개인 사용자에게 직접적인 피해 (재정, 프라이버시)"
+
+    // AML.T0048.004 - AI Intellectual Property Theft
+    | ipTheft
+      user info: "AI 아티팩트 유출을 통한 지적재산 탈취 및 경제적 피해"
+  }
+}
+
+// ============================================================================
+// Associations
+// ============================================================================
+associations {
+  // Foundation
+  Foundation.AIComponent [component] * <-- Monitors --> * [monitor] Infrastructure.AIInfrastructure
+
+  // LLM - Application Service
+  GenerativeAI.LargeLanguageModel [llm] 1 <-- Serves --> * [appService] Infrastructure.ApplicationService
+
+  // LLM - Agent
+  GenerativeAI.LargeLanguageModel [llm] 1 <-- Powers --> * [agent] AgenticAI.AIAgent
+
+  // Agent - Tools
+  AgenticAI.AIAgent [agent] * <-- Uses --> * [tools] AgenticAI.AgentTool
+
+  // Agent - Memory
+  AgenticAI.AIAgent [agent] 1 <-- Stores --> * [memory] AgenticAI.AgentMemory
+
+  // Agent - Orchestrator
+  AgenticAI.AIAgent [agents] * <-- Coordinates --> 0..1 [orchestrator] AgenticAI.Orchestrator
+
+  // Retrieval Module - VectorDB
+  DataLayer.RetrievalModule [retrievalModule] * <-- Queries --> 1 [vectorDB] DataLayer.VectorDatabase
+
+  // Retrieval Module - LLM
+  DataLayer.RetrievalModule [retrievalModule] * <-- Augments --> 1 [llm] GenerativeAI.LargeLanguageModel
+
+  // Embedding Model - VectorDB
+  DataLayer.EmbeddingModel [embeddingModel] * <-- Populates --> 1 [vectorDB] DataLayer.VectorDatabase
+
+  // Training Data - AI Model
+  DataLayer.TrainingData [trainingData] * <-- Trains --> * [model] Foundation.AIModel
+
+  // Supply Chain - All AI Components
+  SupplyChain.AISupplyChain [supplyChain] 1 <-- Provisions --> * [components] Foundation.AIComponent
+
+  // Supply Chain - Training Data
+  SupplyChain.AISupplyChain [supplyChain] 1 <-- Provides --> * [trainingData] DataLayer.TrainingData
+
+  // Application Service - LLM (reference for promptInfiltration targets)
+  Infrastructure.ApplicationService [appService] * <-- Accesses --> * [vectorDB] DataLayer.VectorDatabase
+
+  // LLM - External Impact
+  GenerativeAI.LargeLanguageModel [llm] * <-- Causes --> * [impact] ExternalHarms.ExternalImpact
+
+  // AI Infrastructure - Application Service
+  Infrastructure.AIInfrastructure [infra] 1 <-- Hosts --> * [services] Infrastructure.ApplicationService
+
+  // Agent - Application Service
+  AgenticAI.AIAgent [agent] * <-- ExposedVia --> * [appService] Infrastructure.ApplicationService
+
+  // Orchestrator - LLM
+  AgenticAI.Orchestrator [orchestrator] * <-- Uses --> 1 [llm] GenerativeAI.LargeLanguageModel
+}

@@ -1,0 +1,979 @@
+/*
+ * AILang Agentic v0.2.0
+ * MAL (Meta Attack Language) DSL for Generative AI / Agentic AI Systems
+ *
+ * Coverage:
+ *   - MITRE ATLAS v5.4 (16 tactics, 155 techniques, 35 mitigations)
+ *   - OWASP LLM Top 10 2025 (LLM01–LLM10)
+ *   - OWASP Securing Agentic Applications Guide 1.0 (T1–T15, KC1–KC6)
+ *   - ISO/IEC 5339:2024 (AI lifecycle, trustworthiness)
+ *
+ * Assets: 15 (3 abstract + 12 concrete)
+ * Attack Steps: 130+
+ * Defenses: 50+
+ * Associations: 22
+ *
+ * Generated: 2026-03-25
+ * Methodology: Prompt - Case_1_v0.1.txt (6-step MAL creation methodology)
+ */
+
+#id: "com.security.ailang.agentic"
+#version: "0.2.0"
+
+// ============================================================
+// CATEGORY: AIFoundation
+// Base abstract assets shared across all AI components
+// ============================================================
+
+category AIFoundation {
+
+    // Abstract base asset for all AI system components
+    // Provides common attack surface and defense primitives
+    abstract asset AIComponent {
+
+        | exploit
+            user info: "AI 컴포넌트에 대한 일반적인 취약점 공격 (ATLAS AML.T0000 계열)"
+            developer info: "Base exploit step inherited by all AI components"
+            -> compromise
+
+        | validAccountAccess
+            user info: "유효한 계정/자격증명을 통한 정상적 접근 경로 악용 (ATLAS AML.T0012)"
+            developer info: "Adversary uses valid credentials to access AI component"
+            -> compromise
+
+        | compromise
+            user info: "AI 컴포넌트가 완전히 침해된 상태"
+            developer info: "Final compromise state — reached from multiple attack paths"
+
+        # accessControl
+            user info: "접근 제어 메커니즘 (인증, 인가, 최소권한 원칙)"
+            developer info: "ATLAS M0001 Limit Model Artifact Release, M0018 User Training"
+            -> exploit, validAccountAccess
+
+        # telemetryLogging
+            user info: "행동 모니터링 및 감사 로그 수집"
+            developer info: "ATLAS M0020 Adversarial Detection, M0021 ML Model Audit Logging"
+            -> compromise
+    }
+}
+
+// ============================================================
+// CATEGORY: GenerativeAI
+// Core generative AI model assets and supporting data
+// ============================================================
+
+category GenerativeAI {
+
+    // Large Language Model / Foundation Model
+    // Primary attack surface for prompt-based attacks
+    // OWASP LLM01, LLM02, LLM04, LLM06, LLM07, LLM09, LLM10
+    asset GenerativeLanguageModel extends AIComponent {
+
+        | directPromptInjection
+            user info: "사용자가 직접 악의적 명령을 프롬프트에 삽입 (OWASP LLM01, ATLAS AML.T0051.000)"
+            developer info: "Attacker directly manipulates LLM via crafted user input"
+            -> overrideSystemPrompt, generateHarmfulContent, extractSystemPrompt
+
+        | indirectPromptInjection
+            user info: "외부 데이터 소스(웹페이지, 문서 등)를 통한 간접적 명령 삽입 (ATLAS AML.T0051.001)"
+            developer info: "Malicious content in retrieved documents triggers unintended LLM behavior"
+            -> triggerAgentAction, trustedOutputManipulation, dataLeakage
+
+        | triggeredPromptInjection
+            user info: "특정 조건이나 컨텍스트에서만 활성화되는 지연 실행 프롬프트 인젝션"
+            developer info: "Delayed/conditional injection — activates on specific trigger context"
+            -> delayExecution, triggerAgentAction
+
+        | jailbreak
+            user info: "안전 가이드라인 및 정렬 제약을 우회하는 탈옥 공격 (ATLAS AML.T0054, OWASP LLM01)"
+            developer info: "Bypasses model safety training and content filters"
+            -> bypassSafetyGuardrails, generateHarmfulContent, generateMaliciousCommands
+
+        | promptObfuscation
+            user info: "탐지 회피를 위한 프롬프트 난독화 (Base64, 암호화, 동음이의어 등) (ATLAS AML.T0049)"
+            developer info: "Encoded/obfuscated prompts evade content-based filters"
+            -> bypassSafetyGuardrails, jailbreak
+
+        | promptCrafting
+            user info: "LLM 동작을 조작하기 위한 정교한 프롬프트 설계 (ATLAS AML.T0040)"
+            developer info: "Adversary crafts prompts specifically to elicit unintended model behavior"
+            -> directPromptInjection, jailbreak, extractSystemPrompt
+
+        | overrideSystemPrompt
+            user info: "시스템 프롬프트 덮어쓰기 또는 무력화 (OWASP LLM07, ATLAS AML.T0051)"
+            developer info: "Attacker overrides system-level instructions with adversarial ones"
+            -> generateHarmfulContent, generateMaliciousCommands
+
+        | bypassSafetyGuardrails
+            user info: "안전 필터 및 콘텐츠 정책 우회 (OWASP LLM01, ATLAS AML.T0054)"
+            developer info: "Content safety mechanisms disabled or circumvented"
+            -> generateHarmfulContent, generateMaliciousCommands
+
+        | generateHarmfulContent
+            user info: "유해 콘텐츠, 허위정보, 사회공학 콘텐츠 생성 (OWASP LLM09, ATLAS AML.T0044)"
+            developer info: "LLM produces harmful, false, or dangerous output at adversary direction"
+
+        | generateMaliciousCommands
+            user info: "악성 코드, 익스플로잇, 사이버 공격 명령 생성 (ATLAS AML.T0044.000)"
+            developer info: "LLM generates usable attack payloads or malicious scripts"
+            -> triggerAgentAction
+
+        | triggerAgentAction
+            user info: "에이전트 도구 호출 또는 자율 행동 유발 (OWASP LLM06, ATLAS AML.T0080)"
+            developer info: "LLM triggers downstream agent actions via manipulated reasoning"
+
+        | extractSystemPrompt
+            user info: "기밀 시스템 프롬프트 내용 추출 (OWASP LLM07, ATLAS AML.T0056.004)"
+            developer info: "Attacker extracts confidential system prompt instructions"
+            -> systemPromptLeakage
+
+        | systemPromptLeakage
+            user info: "시스템 프롬프트 기밀 정보 노출 (OWASP LLM07)"
+            developer info: "Disclosed system prompt reveals internal configurations, personas, or secrets"
+
+        | dataLeakage
+            user info: "학습 데이터 또는 컨텍스트 내 민감 정보 유출 (OWASP LLM02, ATLAS AML.T0024)"
+            developer info: "PII, secrets, or confidential context leaked through LLM output"
+
+        | trustedOutputManipulation
+            user info: "신뢰할 수 있는 것처럼 보이는 조작된 출력 생성 (ATLAS AML.T0048)"
+            developer info: "Adversary causes LLM to produce outputs that appear authoritative or trustworthy"
+            -> citationManipulation
+
+        | citationManipulation
+            user info: "허위 인용 또는 환각된 출처 생성으로 신뢰성 조작 (OWASP LLM09)"
+            developer info: "LLM cites non-existent sources or fabricates authoritative references"
+
+        | maliciousResponseRendering
+            user info: "악성 콘텐츠가 포함된 응답을 클라이언트에서 렌더링 유도 (OWASP LLM05)"
+            developer info: "LLM output contains XSS, injected scripts, or unsafe content for downstream rendering"
+
+        | promptSelfReplication
+            user info: "프롬프트 인젝션을 통한 자기 복제 공격 전파 (ATLAS AML.T0051.002)"
+            developer info: "Prompt injection causes the LLM to replicate the malicious payload to other contexts"
+
+        | manipulateChatHistory
+            user info: "대화 이력 조작으로 컨텍스트 오염 (OWASP Agentic T9, ATLAS AML.T0080)"
+            developer info: "Chat history poisoned to create false context for subsequent interactions"
+
+        | delayExecution
+            user info: "미래의 특정 시점에 활성화되는 지연 명령 삽입 (ATLAS AML.T0080.002)"
+            developer info: "Time-delayed or condition-triggered execution of adversarial instructions"
+
+        | discoverHallucinations
+            user info: "환각 취약점 탐색 및 패키지 혼동 공격 준비 (ATLAS AML.T0056.001)"
+            developer info: "Attacker probes for hallucinated package names or APIs to exploit"
+            -> exploitHallucinatedPackages
+
+        | exploitHallucinatedPackages
+            user info: "환각된 패키지명을 악용한 의존성 혼동 공격 (ATLAS AML.T0019.002)"
+            developer info: "Attacker publishes malicious package matching LLM-hallucinated name"
+
+        | denialOfService
+            user info: "LLM 서비스 거부 공격 (토큰 폭탄, 재귀 프롬프트 등) (OWASP LLM10, ATLAS AML.T0029)"
+            developer info: "Resource exhaustion via crafted prompts (token flooding, recursive expansions)"
+
+        | costHarvesting
+            user info: "API 호출 비용 과다 발생을 통한 경제적 피해 (OWASP LLM10)"
+            developer info: "Attacker deliberately triggers expensive API calls to cause financial damage"
+
+        | inferTrainingDataMembership
+            user info: "학습 데이터 멤버십 추론 공격 (ATLAS AML.T0024.000)"
+            developer info: "Membership inference attack to determine if specific data was in training set"
+
+        | inferenceAPIExfiltration
+            user info: "추론 API를 통한 모델 또는 데이터 유출 (ATLAS AML.T0040.000)"
+            developer info: "Systematic querying of inference API to extract model knowledge or training data"
+
+        | discoverSystemInfo
+            user info: "시스템 구성, 버전, 배포 정보 탐색 (ATLAS AML.T0007)"
+            developer info: "Reconnaissance to gather info about underlying AI infrastructure"
+
+        | specialCharacterProbing
+            user info: "특수문자를 이용한 필터 우회 탐색 (ATLAS AML.T0049.001)"
+            developer info: "Testing special characters, delimiters, and encoding to bypass input filters"
+            -> bypassSafetyGuardrails
+
+        | systemKeywordProbing
+            user info: "시스템 키워드 및 내부 명령어 탐색 (ATLAS AML.T0056.004)"
+            developer info: "Probing for internal keywords that reveal system prompt or trigger special behavior"
+            -> extractSystemPrompt
+
+        # guardrails
+            user info: "입력/출력 가드레일 (콘텐츠 필터, 안전 분류기)"
+            developer info: "ATLAS M0004 Restrict Number of ML Model Queries, M0002 Passive ML Output Obfuscation"
+            -> directPromptInjection, indirectPromptInjection, jailbreak, promptObfuscation,
+               bypassSafetyGuardrails, maliciousResponseRendering, promptSelfReplication,
+               discoverHallucinations, specialCharacterProbing
+
+        # safetyGuidelines
+            user info: "안전 가이드라인 및 사용 정책 (ATLAS M0005)"
+            developer info: "ATLAS M0005 Control Access to ML Models, M0016 Vulnerability Scanning"
+            -> jailbreak, bypassSafetyGuardrails, generateHarmfulContent, generateMaliciousCommands
+
+        # modelAlignment
+            user info: "RLHF 등 모델 정렬 기법 (ATLAS M0008)"
+            developer info: "ATLAS M0008 Validate ML Model, M0019 Encrypt Sensitive Information"
+            -> jailbreak, generateHarmfulContent, trustedOutputManipulation, citationManipulation
+
+        # rateLimiting
+            user info: "API 요청 속도 제한 (ATLAS M0004)"
+            developer info: "ATLAS M0004 Restrict Number of ML Model Queries"
+            -> denialOfService, costHarvesting, inferTrainingDataMembership, inferenceAPIExfiltration
+    }
+
+    // Embedding model for vectorization of text
+    // Used in RAG pipelines and semantic search
+    // OWASP LLM08, ATLAS AML.T0015
+    asset EmbeddingModel extends AIComponent {
+
+        | connect
+            user info: "임베딩 모델 엔드포인트에 대한 초기 접근"
+            developer info: "Initial access to embedding model API or service"
+            -> invertEmbedding, evadeModel, poisonModel
+
+        | invertEmbedding
+            user info: "임베딩 벡터에서 원본 텍스트 역추론 (OWASP LLM08, ATLAS AML.T0024.002)"
+            developer info: "Inversion attack to recover approximate original text from embedding vector"
+            -> dataLeakage
+
+        | dataLeakage
+            user info: "임베딩 모델을 통한 민감 정보 유출"
+            developer info: "Sensitive text fragments leaked through embedding similarity"
+
+        | evadeModel
+            user info: "임베딩 기반 유사도 탐지 우회 (ATLAS AML.T0015)"
+            developer info: "Adversarial perturbation to evade similarity-based detection using embeddings"
+
+        | poisonModel
+            user info: "임베딩 모델 파인튜닝 데이터 오염 (ATLAS AML.T0018)"
+            developer info: "Poison fine-tuning data to degrade embedding quality or insert backdoors"
+
+        | extractModel
+            user info: "임베딩 모델 파라미터 추출 (ATLAS AML.T0056.002)"
+            developer info: "Model extraction attack via systematic API querying of embedding model"
+
+        # modelHardening
+            user info: "모델 강화 (적대적 학습, 입력 정규화)"
+            developer info: "ATLAS M0007 Sanitize Training Data, M0014 Verify ML Artifacts"
+            -> invertEmbedding, evadeModel, poisonModel
+
+        # outputObfuscation
+            user info: "임베딩 출력 난독화 (노이즈 추가, 반올림)"
+            developer info: "ATLAS M0002 Passive ML Output Obfuscation"
+            -> invertEmbedding, extractModel
+    }
+
+    // Training dataset for AI models
+    // OWASP LLM04, ATLAS AML.T0018, AML.T0019
+    asset TrainingData {
+
+        | access
+            user info: "학습 데이터셋에 대한 접근 획득"
+            developer info: "Initial access to training data storage or pipeline"
+            -> poison, membership_inference
+
+        | poison
+            user info: "학습 데이터 오염 공격 (ATLAS AML.T0018, OWASP LLM04)"
+            developer info: "Adversarial data injected into training set to backdoor or degrade model"
+            -> erodeIntegrity
+
+        | erodeIntegrity
+            user info: "데이터 무결성 침해로 모델 성능 저하 (ATLAS AML.T0018.000)"
+            developer info: "Model trained on corrupted data produces unreliable outputs"
+            -> publishPoisoned
+
+        | publishPoisoned
+            user info: "오염된 데이터셋을 공개 저장소에 배포 (ATLAS AML.T0019.000)"
+            developer info: "Poisoned dataset published to trick others into using compromised training data"
+
+        | membership_inference
+            user info: "멤버십 추론으로 개인정보 포함 여부 확인 (ATLAS AML.T0024.000, OWASP LLM02)"
+            developer info: "Attacker determines whether specific individuals' data was in training set"
+
+        # dataSanitization
+            user info: "학습 데이터 정제 및 검증 (ATLAS M0007)"
+            developer info: "ATLAS M0007 Sanitize Training Data"
+            -> poison, erodeIntegrity
+
+        # dataProvenance
+            user info: "데이터 출처 추적 및 무결성 검증 (ATLAS M0013)"
+            developer info: "ATLAS M0013 Code Signing — adapted for data artifacts"
+            -> poison, publishPoisoned
+
+        # dataAccessControl
+            user info: "학습 데이터 접근 제어 (ATLAS M0005)"
+            developer info: "ATLAS M0005 Control Access to ML Models"
+            -> access, membership_inference
+    }
+
+    // Trained model artifact (weights, checkpoints, serialized models)
+    // OWASP LLM03, ATLAS AML.T0010, AML.T0011
+    asset ModelArtifact {
+
+        | access
+            user info: "모델 아티팩트 (가중치, 체크포인트) 접근"
+            developer info: "Access to model files, weights, or serialized model objects"
+            -> extractModel, manipulateModel
+
+        | extractModel
+            user info: "모델 가중치 또는 구조 추출 (ATLAS AML.T0056.002)"
+            developer info: "Physical access to model weights enables full model extraction"
+
+        | manipulateModel
+            user info: "모델 파라미터 직접 조작 (ATLAS AML.T0011)"
+            developer info: "Direct modification of model weights to alter behavior"
+            -> backdoorInjection, corruptModel
+
+        | backdoorInjection
+            user info: "트리거 기반 백도어를 모델에 삽입 (ATLAS AML.T0018.001)"
+            developer info: "Hidden trigger embedded in model causes specific malicious behavior when activated"
+
+        | corruptModel
+            user info: "모델 손상으로 서비스 거부 또는 오작동 유발 (ATLAS AML.T0031)"
+            developer info: "Model weights corrupted to cause inference failures or denial of service"
+
+        | embedMalware
+            user info: "직렬화된 모델 파일에 악성코드 삽입 (ATLAS AML.T0011.000, OWASP LLM03)"
+            developer info: "Malicious code embedded in pickle/safetensor files executes on load"
+
+        | publishPoisoned
+            user info: "손상된 모델을 공개 모델 허브에 배포 (ATLAS AML.T0019.001)"
+            developer info: "Compromised model published to model hub to infect downstream users"
+
+        # modelAccessControl
+            user info: "모델 아티팩트 접근 제어 (ATLAS M0005)"
+            developer info: "ATLAS M0005 Control Access to ML Models, M0001 Limit Model Artifact Release"
+            -> access, extractModel
+
+        # artifactVerification
+            user info: "모델 무결성 검증 (해시, 서명 확인) (ATLAS M0014)"
+            developer info: "ATLAS M0014 Verify ML Artifacts"
+            -> manipulateModel, backdoorInjection, embedMalware
+
+        # modelValidation
+            user info: "배포 전 모델 동작 검증 (ATLAS M0008)"
+            developer info: "ATLAS M0008 Validate ML Model"
+            -> backdoorInjection, corruptModel
+
+        # codeSigning
+            user info: "모델 아티팩트 코드 서명 (ATLAS M0013)"
+            developer info: "ATLAS M0013 Code Signing for model files"
+            -> publishPoisoned, embedMalware
+    }
+}
+
+// ============================================================
+// CATEGORY: AgenticAI
+// Agentic AI system components — orchestration, memory, tools
+// ============================================================
+
+category AgenticAI {
+
+    // Orchestration engine coordinating multi-agent workflows
+    // OWASP Agentic T1–T3, KC1, ATLAS AML.T0080
+    asset OrchestrationEngine extends AIComponent {
+
+        | connect
+            user info: "오케스트레이션 엔진에 대한 초기 접근"
+            developer info: "Initial network/API access to the orchestration layer"
+            -> goalManipulation, identitySpoofing, communicationPoisoning
+
+        | goalManipulation
+            user info: "에이전트의 목표 또는 계획 조작 (OWASP Agentic T2, ATLAS AML.T0080)"
+            developer info: "Adversary alters agent's high-level goals or task plan"
+            -> manipulateChatHistory, obfuscateActionTrail
+
+        | identitySpoofing
+            user info: "다른 에이전트 또는 신뢰된 서비스로 위장 (OWASP Agentic T1)"
+            developer info: "Attacker impersonates trusted agent identity to gain elevated trust"
+            -> goalManipulation
+
+        | manipulateChatHistory
+            user info: "에이전트 대화 이력 조작으로 컨텍스트 오염 (OWASP Agentic T9)"
+            developer info: "Chat history manipulation creates false context affecting agent decisions"
+
+        | obfuscateActionTrail
+            user info: "에이전트 행동 기록 은폐 및 감사 추적 방해 (ATLAS AML.T0054.003)"
+            developer info: "Attacker obfuscates malicious agent actions to evade detection"
+
+        | communicationPoisoning
+            user info: "에이전트 간 통신 채널 오염 (OWASP Agentic T3)"
+            developer info: "Adversary intercepts or modifies inter-agent messages"
+            -> goalManipulation
+
+        # componentSegmentation
+            user info: "에이전트 컴포넌트 격리 및 최소권한 통신 (ATLAS M0022)"
+            developer info: "ATLAS M0022 Network Segmentation — applied to agent communication"
+            -> identitySpoofing, communicationPoisoning
+
+        # workflowLogging
+            user info: "에이전트 워크플로우 상세 로깅 및 모니터링"
+            developer info: "ATLAS M0020 Adversarial Detection, M0021 Audit Logging"
+            -> obfuscateActionTrail, manipulateChatHistory
+    }
+
+    // Reasoning module for chain-of-thought and planning
+    // OWASP Agentic T4, KC2
+    asset ReasoningModule extends AIComponent {
+
+        | connect
+            user info: "추론 모듈에 대한 접근"
+            developer info: "Access to the reasoning/planning component of the agent"
+            -> manipulateReasoning, cascadingHallucination
+
+        | manipulateReasoning
+            user info: "추론 체인 조작으로 잘못된 결론 도달 유도 (OWASP Agentic T4, ATLAS AML.T0080)"
+            developer info: "Adversary injects false premises to corrupt chain-of-thought reasoning"
+            -> cascadingHallucination
+
+        | cascadingHallucination
+            user info: "추론 오류가 연쇄적으로 전파되는 할루시네이션 연쇄 (OWASP LLM09)"
+            developer info: "One hallucination in reasoning chain triggers cascading false conclusions"
+
+        | delayedInstruction
+            user info: "추론 단계에서 지연 실행될 명령 삽입 (ATLAS AML.T0080.002)"
+            developer info: "Instructions planted in reasoning context activate on future reasoning steps"
+
+        # reasoningGuardrails
+            user info: "추론 단계 검증 및 일관성 확인"
+            developer info: "ATLAS M0004, M0008 — validate intermediate reasoning steps"
+            -> manipulateReasoning, cascadingHallucination, delayedInstruction
+    }
+
+    // Memory module for agent persistent and working memory
+    // OWASP Agentic KC4.1–KC4.6, T5–T7
+    asset MemoryModule extends AIComponent {
+
+        | access
+            user info: "메모리 모듈 접근 (단기/장기/외부 메모리)"
+            developer info: "Access to agent memory storage (in-context, episodic, semantic, external)"
+            -> poisonMemory, exfiltrateMemory
+
+        | poisonMemory
+            user info: "에이전트 메모리 오염으로 지속적 행동 조작 (OWASP Agentic T5, ATLAS AML.T0080.001)"
+            developer info: "Malicious content injected into agent memory persists across sessions"
+            -> poisonThread, cascadePoisoning
+
+        | poisonThread
+            user info: "대화 스레드 오염으로 지속적 컨텍스트 조작 (OWASP Agentic T6)"
+            developer info: "Thread-level memory poisoning affects all future interactions in that thread"
+            -> cascadePoisoning
+
+        | cascadePoisoning
+            user info: "메모리 오염이 다른 에이전트나 세션으로 전파 (OWASP Agentic T7)"
+            developer info: "Poisoned memory propagates to other agents or sessions sharing memory"
+
+        | tamperEvidenceInMemory
+            user info: "메모리 내 증거 삭제 또는 변조 (ATLAS AML.T0054.003)"
+            developer info: "Adversary modifies memory contents to remove traces of malicious activity"
+
+        | exfiltrateMemory
+            user info: "에이전트 메모리 내 민감 정보 유출 (OWASP LLM02, OWASP Agentic T5)"
+            developer info: "Sensitive data stored in agent memory (credentials, PII, secrets) exfiltrated"
+
+        # memoryHardening
+            user info: "메모리 무결성 보호 (체크섬, 버전 관리)"
+            developer info: "ATLAS M0007, M0014 — integrity checks on stored memory"
+            -> poisonMemory, poisonThread, tamperEvidenceInMemory
+
+        # memoryAccessControl
+            user info: "메모리 접근 제어 및 격리 (세션/사용자 격리)"
+            developer info: "ATLAS M0005, M0022 — strict access control and memory isolation"
+            -> access, exfiltrateMemory, cascadePoisoning
+    }
+
+    // Tool integration framework for external tool/API calls
+    // OWASP Agentic KC3, T10–T12, OWASP LLM06
+    asset ToolIntegrationFramework extends AIComponent {
+
+        | connect
+            user info: "도구 통합 프레임워크에 대한 접근"
+            developer info: "Access to the tool invocation layer of the agent"
+            -> unauthorizedToolInvocation, toolMisuse
+
+        | unauthorizedToolInvocation
+            user info: "권한 없는 도구 호출 (OWASP LLM06, OWASP Agentic T10)"
+            developer info: "Agent invokes tools beyond its authorized scope without proper validation"
+            -> dataExfiltration, dataDestruction, privilegeEscalation
+
+        | toolMisuse
+            user info: "도구를 의도하지 않은 방식으로 악용 (OWASP Agentic T11)"
+            developer info: "Legitimate tools used in unintended ways to achieve malicious goals"
+            -> dataExfiltration, unexpectedCodeExecution
+
+        | dataExfiltration
+            user info: "도구를 통한 데이터 유출 (ATLAS AML.T0025)"
+            developer info: "Sensitive data exfiltrated via authorized external tool calls"
+
+        | dataDestruction
+            user info: "도구를 통한 데이터 삭제 또는 파괴 (ATLAS AML.T0101)"
+            developer info: "Attacker uses AI agent tools to delete critical data or systems"
+
+        | privilegeEscalation
+            user info: "도구 호출을 통한 권한 상승 (OWASP Agentic T12, ATLAS AML.T0068)"
+            developer info: "Leveraging tool permissions to escalate privileges beyond intended scope"
+            -> credentialHarvesting
+
+        | credentialHarvesting
+            user info: "도구 실행 과정에서 자격증명 수집 (ATLAS AML.T0025.001)"
+            developer info: "Credentials or API keys harvested during tool execution"
+
+        | toolDataPoisoning
+            user info: "도구 입력/출력 데이터 오염 (ATLAS AML.T0048)"
+            developer info: "Data passed to/from tools manipulated to corrupt agent decision-making"
+
+        | unexpectedCodeExecution
+            user info: "도구 체인을 통한 예기치 않은 코드 실행 (ATLAS AML.T0099)"
+            developer info: "Unintended code execution triggered through chained tool calls"
+
+        # toolPermissions
+            user info: "도구 호출 권한 최소화 (최소권한 원칙)"
+            developer info: "ATLAS M0018, M0022 — minimal permission set for each tool"
+            -> unauthorizedToolInvocation, privilegeEscalation
+
+        # restrictUntrustedDataToolInvocation
+            user info: "신뢰할 수 없는 데이터 소스의 도구 호출 제한"
+            developer info: "ATLAS M0004, M0005 — restrict tool calls triggered by untrusted input"
+            -> toolMisuse, toolDataPoisoning, unexpectedCodeExecution
+
+        # toolIOValidation
+            user info: "도구 입력/출력 유효성 검증"
+            developer info: "ATLAS M0015, M0017 — validate all tool inputs and outputs"
+            -> toolDataPoisoning, unexpectedCodeExecution, dataExfiltration
+
+        # humanApproval
+            user info: "고위험 도구 호출에 대한 인간 승인 절차 (OWASP Agentic, Human-in-the-loop)"
+            developer info: "ATLAS M0018 User Training — require human approval for high-risk operations"
+            -> dataDestruction, privilegeEscalation, unauthorizedToolInvocation
+    }
+
+    // External tools and services invoked by agents
+    // OWASP Agentic KC3, ATLAS AML.T0099
+    asset ExternalTool {
+
+        | connect
+            user info: "외부 도구/서비스에 대한 접근"
+            developer info: "Network/API access to external tools (web search, code execution, APIs)"
+            -> execute, commandExecution
+
+        | execute
+            user info: "외부 도구 실행"
+            developer info: "Execution of external tool (file system, shell, web API, etc.)"
+            -> commandExecution, dataLeak
+
+        | commandExecution
+            user info: "외부 도구를 통한 시스템 명령 실행 (ATLAS AML.T0099)"
+            developer info: "OS commands executed via external tool invocation"
+            -> codeInjection, reverseShell, escalatePrivilege
+
+        | codeInjection
+            user info: "코드 인젝션을 통한 임의 코드 실행 (ATLAS AML.T0099.001)"
+            developer info: "Injected code executes in the context of the external tool"
+            -> escapeToHost
+
+        | reverseShell
+            user info: "역방향 쉘 연결 생성 (ATLAS AML.T0099.002)"
+            developer info: "Reverse shell established from tool execution environment to attacker"
+            -> escapeToHost
+
+        | escalatePrivilege
+            user info: "도구 실행 환경에서의 권한 상승"
+            developer info: "Local privilege escalation within tool execution environment"
+            -> escapeToHost
+
+        | escapeToHost
+            user info: "샌드박스/컨테이너 탈출 (ATLAS AML.T0099.003)"
+            developer info: "Escape from sandboxed tool execution environment to host system"
+
+        | dataLeak
+            user info: "외부 도구를 통한 데이터 유출"
+            developer info: "Data exfiltrated through external tool's I/O channels"
+
+        | publishPoisonedTool
+            user info: "악성 코드가 포함된 도구를 공개 저장소에 배포 (OWASP LLM03)"
+            developer info: "Compromised tool published to package registry for supply chain attack"
+
+        # privilegedPermissions
+            user info: "외부 도구 실행 권한 최소화"
+            developer info: "ATLAS M0022 Network Segmentation, M0005 Control Access"
+            -> commandExecution, escalatePrivilege, escapeToHost
+
+        # toolSandboxing
+            user info: "외부 도구 샌드박스 격리 실행"
+            developer info: "ATLAS M0022 Network Segmentation — containerized/sandboxed execution"
+            -> codeInjection, reverseShell, escapeToHost
+
+        # restrictLibraryLoading
+            user info: "외부 도구에서의 라이브러리 로딩 제한 (ATLAS M0010)"
+            developer info: "ATLAS M0010 Restrict Library Loading"
+            -> codeInjection, publishPoisonedTool
+    }
+
+    // Agent configuration including credentials, tool definitions, prompts
+    // OWASP Agentic KC5, T13–T15, OWASP LLM07
+    asset AgentConfiguration {
+
+        | access
+            user info: "에이전트 설정 파일 또는 환경 접근"
+            developer info: "Access to agent configuration (env files, config YAML, system prompt files)"
+            -> extractCredentials, discoverConfiguration
+
+        | extractCredentials
+            user info: "설정에서 API 키, 비밀번호 등 자격증명 추출 (OWASP LLM07, ATLAS AML.T0025)"
+            developer info: "Hardcoded or embedded credentials extracted from configuration"
+
+        | discoverConfiguration
+            user info: "에이전트 설정 내용 탐색 (OWASP Agentic T13)"
+            developer info: "Reconnaissance of agent configuration to understand capabilities and constraints"
+            -> discoverEmbeddedKnowledge, discoverToolDefinitions, discoverActivationTriggers
+
+        | discoverEmbeddedKnowledge
+            user info: "설정에 포함된 도메인 지식, 비즈니스 로직 탐색"
+            developer info: "Extraction of embedded knowledge base, rules, or domain expertise"
+
+        | discoverToolDefinitions
+            user info: "에이전트 도구 목록 및 권한 탐색 (OWASP Agentic T14)"
+            developer info: "Discovery of available tools and their parameter schemas for targeted exploitation"
+
+        | discoverActivationTriggers
+            user info: "특수 동작을 유발하는 트리거 탐색 (OWASP Agentic T15)"
+            developer info: "Attacker probes for hidden activation triggers or special command keywords"
+
+        | modifyConfiguration
+            user info: "에이전트 설정 변조로 동작 조작"
+            developer info: "Unauthorized modification of agent configuration parameters"
+            -> accessUnsecuredCredentials
+
+        | accessUnsecuredCredentials
+            user info: "보안 처리 없이 저장된 자격증명 접근 (ATLAS AML.T0025.001)"
+            developer info: "Plaintext credentials in config files accessed without encryption"
+
+        # singleUserPermissions
+            user info: "에이전트 설정 접근을 단일 서비스 계정으로 제한"
+            developer info: "ATLAS M0005 Control Access to ML Models"
+            -> access, modifyConfiguration, accessUnsecuredCredentials
+
+        # encryptConfiguration
+            user info: "설정 파일 암호화 및 비밀 관리 서비스 활용 (ATLAS M0019)"
+            developer info: "ATLAS M0019 Encrypt Sensitive Information — use secrets manager"
+            -> extractCredentials, accessUnsecuredCredentials
+    }
+}
+
+// ============================================================
+// CATEGORY: RAGComponents
+// Retrieval-Augmented Generation pipeline assets
+// ============================================================
+
+category RAGComponents {
+
+    // RAG pipeline coordinating retrieval and augmented generation
+    // OWASP LLM08, ATLAS AML.T0070, AML.T0071
+    asset RAGPipeline extends AIComponent {
+
+        | connect
+            user info: "RAG 파이프라인에 대한 초기 접근"
+            developer info: "Access to the RAG pipeline (document ingestion or retrieval endpoints)"
+            -> poisonRetrieval, gatherIndexedTargets
+
+        | poisonRetrieval
+            user info: "검색 파이프라인 오염으로 악성 컨텍스트 주입 (ATLAS AML.T0070)"
+            developer info: "Attacker poisons retrieval results to inject malicious context into LLM"
+            -> craftRetrievalContent
+
+        | gatherIndexedTargets
+            user info: "인덱싱된 문서 목록 탐색 (ATLAS AML.T0007.001)"
+            developer info: "Reconnaissance to identify what documents are indexed in vector store"
+            -> craftRetrievalContent
+
+        | craftRetrievalContent
+            user info: "검색 결과를 조작하기 위한 콘텐츠 제작 (ATLAS AML.T0071)"
+            developer info: "Carefully crafted content designed to be retrieved and manipulate LLM"
+            -> harvestCredentials
+
+        | harvestCredentials
+            user info: "RAG 파이프라인을 통한 자격증명 수집 (ATLAS AML.T0025)"
+            developer info: "Sensitive credentials retrieved and leaked through RAG context"
+
+        # documentValidation
+            user info: "문서 수집 전 유효성 검증 (형식, 스키마, 콘텐츠 필터링)"
+            developer info: "ATLAS M0015 Adversarial Input Detection — validate ingested documents"
+            -> poisonRetrieval, craftRetrievalContent
+
+        # documentProvenance
+            user info: "문서 출처 추적 및 신뢰도 검증"
+            developer info: "ATLAS M0013 Code Signing — provenance tracking for ingested documents"
+            -> poisonRetrieval, harvestCredentials
+    }
+
+    // Vector database storing embeddings for retrieval
+    // OWASP LLM08, ATLAS AML.T0070, AML.T0071
+    asset VectorDatabase extends AIComponent {
+
+        | access
+            user info: "벡터 데이터베이스에 대한 접근"
+            developer info: "Direct database access to vector store"
+            -> injectFalseEntry, ragPoisoning, dataLeakage
+
+        | injectFalseEntry
+            user info: "가짜 벡터 엔트리 삽입으로 검색 결과 조작 (ATLAS AML.T0071)"
+            developer info: "False entries injected into vector DB surface during retrieval to poison LLM"
+            -> ragPoisoning
+
+        | ragPoisoning
+            user info: "RAG 인덱스 전체 오염 공격 (ATLAS AML.T0070, OWASP LLM08)"
+            developer info: "Systematic poisoning of vector DB to corrupt all RAG-augmented responses"
+
+        | dataLeakage
+            user info: "벡터 DB에서 민감 정보 유출 (OWASP LLM02, LLM08)"
+            developer info: "Sensitive data stored as embeddings extracted or inferred"
+
+        | crossContextLeakage
+            user info: "다른 사용자/세션의 컨텍스트 데이터 접근 (OWASP LLM08)"
+            developer info: "Cross-tenant data leakage through shared vector space"
+
+        | embeddingInversion
+            user info: "저장된 임베딩에서 원본 텍스트 역추론 (OWASP LLM08, ATLAS AML.T0024)"
+            developer info: "Inversion attack on stored embeddings to recover original document contents"
+
+        # vectorDBAccessControl
+            user info: "벡터 DB 접근 제어 (테넌트 격리, 인증)"
+            developer info: "ATLAS M0005, M0022 — per-tenant isolation and strict access control"
+            -> access, crossContextLeakage, dataLeakage
+
+        # vectorEncryption
+            user info: "벡터 데이터 암호화 (저장 중 및 전송 중)"
+            developer info: "ATLAS M0019 Encrypt Sensitive Information"
+            -> dataLeakage, embeddingInversion
+
+        # inputSanitization
+            user info: "벡터 DB 입력 데이터 정제 및 검증"
+            developer info: "ATLAS M0015, M0007 — sanitize all data before vectorization and storage"
+            -> injectFalseEntry, ragPoisoning
+    }
+}
+
+// ============================================================
+// CATEGORY: Infrastructure
+// Infrastructure-level AI system assets
+// ============================================================
+
+category Infrastructure {
+
+    // API endpoint exposing AI model capabilities
+    // OWASP LLM10, ATLAS AML.T0040, AML.T0029
+    asset APIEndpoint extends AIComponent {
+
+        | connect
+            user info: "AI API 엔드포인트에 대한 초기 접근"
+            developer info: "Initial access to public or internal AI API endpoint"
+            -> modelInferenceAccess, costHarvesting, denialOfService
+
+        | modelInferenceAccess
+            user info: "모델 추론 API 무단 접근 (ATLAS AML.T0040)"
+            developer info: "Unauthorized access to model inference endpoint"
+            -> promptInfiltration, spamChaff
+
+        | costHarvesting
+            user info: "API 호출 비용 과다 발생 (OWASP LLM10)"
+            developer info: "Attacker generates excessive API calls to cause financial damage to operator"
+
+        | denialOfService
+            user info: "API 서비스 거부 공격 (OWASP LLM10, ATLAS AML.T0029)"
+            developer info: "Flood of requests overwhelms API causing service unavailability"
+
+        | spamChaff
+            user info: "의미없는 대량 쿼리로 실제 공격 은폐 (ATLAS AML.T0040.001)"
+            developer info: "Spam queries used to hide real attack queries in API logs"
+
+        | promptInfiltration
+            user info: "API를 통한 프롬프트 인젝션 공격 전달"
+            developer info: "Adversarial prompts delivered via API to manipulate backend LLM"
+
+        | apiAbuse
+            user info: "API 악용 (권한 초과 접근, 정책 위반)"
+            developer info: "API used in ways that violate terms of service or exceed authorization"
+
+        # queryRateLimiting
+            user info: "API 요청 속도 및 횟수 제한 (ATLAS M0004)"
+            developer info: "ATLAS M0004 Restrict Number of ML Model Queries"
+            -> costHarvesting, denialOfService, spamChaff
+
+        # apiAccessControl
+            user info: "API 키 관리, 인증, 인가 제어"
+            developer info: "ATLAS M0005 Control Access to ML Models, M0018 User Training"
+            -> connect, modelInferenceAccess, apiAbuse
+    }
+
+    // AI software supply chain (models, datasets, libraries, containers)
+    // OWASP LLM03, ATLAS AML.T0019
+    asset AISupplyChain {
+
+        | access
+            user info: "AI 공급망 컴포넌트에 대한 접근"
+            developer info: "Access to supply chain components (package repos, model hubs, data sources)"
+            -> compromiseSoftware, compromiseModel, compromiseData
+
+        | compromiseSoftware
+            user info: "AI 프레임워크 또는 라이브러리 오염 (OWASP LLM03, ATLAS AML.T0010)"
+            developer info: "Malicious code injected into AI framework or dependency library"
+            -> maliciousPackage
+
+        | compromiseModel
+            user info: "사전학습 모델 또는 파인튜닝 모델 오염 (OWASP LLM03, ATLAS AML.T0019)"
+            developer info: "Backdoored or poisoned model distributed through model supply chain"
+
+        | compromiseData
+            user info: "학습/평가 데이터셋 오염 (ATLAS AML.T0019.000)"
+            developer info: "Poisoned datasets distributed through data supply chain"
+
+        | compromiseContainer
+            user info: "AI 서비스 컨테이너 이미지 오염 (ATLAS AML.T0010.001)"
+            developer info: "Malicious code embedded in Docker/OCI container images for AI services"
+
+        | maliciousPackage
+            user info: "악성 패키지 공개 저장소 배포 (ATLAS AML.T0019.002, OWASP LLM03)"
+            developer info: "Typosquatting or dependency confusion attack via malicious package"
+
+        # aiBOM
+            user info: "AI 소프트웨어 자재 명세서 (AI-BOM) 관리 (OWASP LLM03)"
+            developer info: "ATLAS M0013, M0016 — maintain complete inventory of AI dependencies"
+            -> compromiseSoftware, maliciousPackage
+
+        # supplyChainVerification
+            user info: "공급망 컴포넌트 무결성 검증 (ATLAS M0014)"
+            developer info: "ATLAS M0014 Verify ML Artifacts — hash verification, provenance checks"
+            -> compromiseModel, compromiseData, compromiseContainer
+
+        # vulnerabilityScanning
+            user info: "AI 공급망 취약점 스캔 (ATLAS M0016)"
+            developer info: "ATLAS M0016 Vulnerability Scanning"
+            -> compromiseSoftware, maliciousPackage
+
+        # supplyChainCodeSigning
+            user info: "공급망 코드 서명 검증 (ATLAS M0013)"
+            developer info: "ATLAS M0013 Code Signing for all supply chain artifacts"
+            -> maliciousPackage, compromiseSoftware, compromiseContainer
+    }
+
+    // User-facing interface (chat UI, voice, API client)
+    // OWASP LLM01, ATLAS AML.T0047
+    asset UserInterface {
+
+        | access
+            user info: "사용자 인터페이스에 대한 접근"
+            developer info: "Access to the user-facing interface of the AI system"
+            -> injectMaliciousInput, phishing
+
+        | injectMaliciousInput
+            user info: "사용자 인터페이스를 통한 악성 입력 삽입 (OWASP LLM01)"
+            developer info: "Adversarial input submitted through chat UI or API client"
+
+        | phishing
+            user info: "AI를 활용한 피싱 공격 (ATLAS AML.T0047)"
+            developer info: "Phishing attacks enhanced by AI-generated content"
+            -> llmAssistedPhishing, socialEngineering
+
+        | llmAssistedPhishing
+            user info: "LLM을 활용한 고도화된 피싱 메시지 생성 (ATLAS AML.T0047.000)"
+            developer info: "LLM used to generate convincing personalized phishing content"
+
+        | deepfakeAttack
+            user info: "딥페이크 오디오/비디오를 이용한 사회공학 공격 (ATLAS AML.T0047.001)"
+            developer info: "Synthetic media used to impersonate trusted individuals"
+            -> socialEngineering
+
+        | socialEngineering
+            user info: "AI 지원 사회공학 공격 (ATLAS AML.T0047)"
+            developer info: "AI-assisted social engineering to manipulate users"
+
+        | clickbait
+            user info: "AI 생성 클릭베이트를 통한 악성 링크 유도"
+            developer info: "AI-generated engaging content tricks users into clicking malicious links"
+
+        # userSecurityTraining
+            user info: "사용자 보안 인식 교육 (ATLAS M0018)"
+            developer info: "ATLAS M0018 User Training — educate users about AI-specific threats"
+            -> phishing, llmAssistedPhishing, socialEngineering, clickbait
+
+        # deepfakeDetection
+            user info: "딥페이크 탐지 기술 적용"
+            developer info: "ATLAS M0020 Adversarial Detection — apply deepfake detection"
+            -> deepfakeAttack
+    }
+}
+
+// ============================================================
+// ASSOCIATIONS
+// Relationships between AI system assets
+// ============================================================
+
+associations {
+
+    // LLM ↔ Memory: LLM uses memory modules for context persistence
+    GenerativeLanguageModel [generativeLanguageModels] * <-- UsesMemory --> * [memoryModules] MemoryModule
+
+    // LLM ↔ Orchestration: LLM is controlled by orchestration engine
+    GenerativeLanguageModel [generativeLanguageModels] * <-- OrchestratedBy --> * [orchestrationEngines] OrchestrationEngine
+
+    // LLM ↔ Reasoning: LLM delegates to reasoning module for CoT
+    GenerativeLanguageModel [generativeLanguageModels] * <-- Reasons --> * [reasoningModules] ReasoningModule
+
+    // LLM ↔ Tool Framework: LLM calls external tools through framework
+    GenerativeLanguageModel [generativeLanguageModels] * <-- CallsTools --> * [toolIntegrationFrameworks] ToolIntegrationFramework
+
+    // LLM ↔ RAG Pipeline: LLM augmented by retrieved context
+    GenerativeLanguageModel [generativeLanguageModels] * <-- AugmentedBy --> * [ragPipelines] RAGPipeline
+
+    // LLM ↔ Training Data: LLM trained on datasets
+    GenerativeLanguageModel [generativeLanguageModels] * <-- TrainedOn --> * [trainingData] TrainingData
+
+    // LLM ↔ Model Artifact: LLM implemented as model weights/artifact
+    GenerativeLanguageModel [generativeLanguageModels] 1 <-- ImplementedAs --> 1 [modelArtifacts] ModelArtifact
+
+    // LLM ↔ API Endpoint: LLM exposed through API endpoints
+    GenerativeLanguageModel [generativeLanguageModels] * <-- ExposedThrough --> * [apiEndpoints] APIEndpoint
+
+    // Embedding ↔ RAG: Embedding model serves the RAG pipeline
+    EmbeddingModel [embeddingModels] * <-- EmbeddedBy --> * [ragPipelines] RAGPipeline
+
+    // Embedding ↔ VectorDB: Embeddings stored in vector database
+    EmbeddingModel [embeddingModels] * <-- StoresIn --> * [vectorDatabases] VectorDatabase
+
+    // RAG ↔ VectorDB: RAG pipeline queries vector database
+    RAGPipeline [ragPipelines] * <-- QueriesFrom --> * [vectorDatabases] VectorDatabase
+
+    // Tool Framework ↔ External Tools: Framework invokes external tools
+    ToolIntegrationFramework [toolIntegrationFrameworks] * <-- Invokes --> * [externalTools] ExternalTool
+
+    // Tool Framework ↔ Configuration: Tool framework configured by agent config
+    ToolIntegrationFramework [toolIntegrationFrameworks] * <-- ConfiguredBy --> * [agentConfigurations] AgentConfiguration
+
+    // Orchestration ↔ Memory: Orchestration engine manages memory
+    OrchestrationEngine [orchestrationEngines] * <-- AccessesMemory --> * [memoryModules] MemoryModule
+
+    // Orchestration ↔ Configuration: Orchestration uses agent configuration
+    OrchestrationEngine [orchestrationEngines] * <-- Uses --> * [agentConfigurations] AgentConfiguration
+
+    // Orchestration ↔ Tool Framework: Orchestration controls tool execution
+    OrchestrationEngine [orchestrationEngines] * <-- Controls --> * [toolIntegrationFrameworks] ToolIntegrationFrameworks ToolIntegrationFramework
+
+    // Reasoning ↔ Memory: Reasoning module reads from memory
+    ReasoningModule [reasoningModules] * <-- ReadsFrom --> * [memoryModules] MemoryModule
+
+    // Supply Chain ↔ Model Artifact: Supply chain provides model artifacts
+    AISupplyChain [aiSupplyChains] * <-- Provides --> * [modelArtifacts] ModelArtifact
+
+    // Supply Chain ↔ Training Data: Supply chain provides training datasets
+    AISupplyChain [aiSupplyChains] * <-- ProvidesData --> * [trainingData] TrainingData
+
+    // Supply Chain ↔ External Tools: Supply chain provides tool libraries
+    AISupplyChain [aiSupplyChains] * <-- ProvidesTools --> * [externalTools] ExternalTool
+
+    // User Interface ↔ API Endpoint: UI communicates through API
+    UserInterface [userInterfaces] * <-- AccessesThrough --> * [apiEndpoints] APIEndpoint
+
+    // User Interface ↔ LLM: User directly interacts with LLM
+    UserInterface [userInterfaces] * <-- InteractsWith --> * [generativeLanguageModels] GenerativeLanguageModel
+}
