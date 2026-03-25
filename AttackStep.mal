@@ -1,0 +1,1185 @@
+// ============================================================
+// AttackStep.mal — Auto-generated from MITRE ATLAS Techniques
+// ============================================================
+
+#id: "AI-Lang"
+#version: "0.0.1"
+
+category AILang {
+
+    // --------------------------------------------------------
+    // P.1.1.3 Generative Language Models
+    // --------------------------------------------------------
+    asset GenerativeLanguageModels {
+
+        // AML.T0015 - Evade AI Model (Tactic: Initial Access, Defense Evasion, Impact)
+        | evadeMLModel
+            -> to-do
+
+        // AML.T0018 - Manipulate AI Model (Tactic: Persistence, ML Attack Staging)
+        | manipulateAIModel
+            -> to-do
+
+        // AML.T0018.000 - Poison AI Model (Tactic: Persistence, ML Attack Staging)
+        | poisonAIModel
+            -> to-do
+
+        // AML.T0018.001 - Modify AI Model Architecture (Tactic: Persistence, ML Attack Staging)
+        | modifyAIModelArchitecture
+            -> to-do
+
+        // AML.T0018.002 - Embed Malware (Tactic: Persistence, ML Attack Staging)
+        | embedMalware
+            -> to-do
+
+        // AML.T0043 - Craft Adversarial Data (Tactic: ML Attack Staging)
+        | craftAdversarialData
+            -> to-do
+
+        // AML.T0043.000 - White-Box Optimization (Tactic: ML Attack Staging)
+        | craftAdversarialWhiteBox
+            -> to-do
+
+        // AML.T0043.001 - Black-Box Optimization (Tactic: ML Attack Staging)
+        | craftAdversarialBlackBox
+            -> to-do
+
+        // AML.T0043.002 - Black-Box Transfer (Tactic: ML Attack Staging)
+        | craftAdversarialTransfer
+            -> to-do
+
+        // AML.T0043.003 - Manual Modification (Tactic: ML Attack Staging)
+        | craftAdversarialManual
+            -> to-do
+
+        // AML.T0043.004 - Insert Backdoor Trigger (Tactic: ML Attack Staging)
+        | insertBackdoorTrigger
+            -> to-do
+
+        // AML.T0031 - Erode AI Model Integrity (Tactic: Impact)
+        | erodeModelIntegrity
+            -> to-do
+
+        // AML.T0013 - Discover AI Model Ontology (Tactic: Discovery)
+        | discoverModelOntology
+            -> to-do
+
+        // AML.T0014 - Discover AI Model Family (Tactic: Discovery)
+        | discoverModelFamily
+            -> to-do
+
+        // AML.T0054 - LLM Jailbreak (Tactic: Privilege Escalation, Defense Evasion)
+        | llmJailbreak
+            -> to-do
+
+        // AML.T0051 - LLM Prompt Injection (Tactic: Execution)
+        | llmPromptInjection
+            -> to-do
+
+        // AML.T0051.000 - Direct Prompt Injection (Tactic: Execution)
+        | llmPromptInjectionDirect
+            -> to-do
+
+        // AML.T0051.001 - Indirect Prompt Injection (Tactic: Execution)
+        | llmPromptInjectionIndirect
+            -> to-do
+
+        // AML.T0051.002 - Triggered Prompt Injection (Tactic: Execution)
+        | llmPromptInjectionTriggered
+            -> to-do
+
+        // AML.T0057 - LLM Data Leakage (Tactic: Exfiltration)
+        | llmDataLeakage
+            -> to-do
+
+        // AML.T0056 - Extract LLM System Prompt (Tactic: Exfiltration)
+        | extractLLMSystemPrompt
+            -> to-do
+
+        // AML.T0061 - LLM Prompt Self-Replication (Tactic: Persistence)
+        | llmPromptSelfReplication
+            -> to-do
+
+        // AML.T0062 - Discover LLM Hallucinations (Tactic: Discovery)
+        | discoverLLMHallucinations
+            -> to-do
+
+        // AML.T0067 - LLM Trusted Output Components Manipulation (Tactic: Defense Evasion)
+        | llmOutputManipulation
+            -> to-do
+
+        // AML.T0067.000 - Citations Manipulation (Tactic: Defense Evasion)
+        | llmOutputCitationsManipulation
+            -> to-do
+
+        // AML.T0068 - LLM Prompt Obfuscation (Tactic: Defense Evasion)
+        | llmPromptObfuscation
+            -> to-do
+
+        // AML.T0069 - Discover LLM System Information (Tactic: Discovery)
+        | discoverLLMSystemInfo
+            -> to-do
+
+        // AML.T0069.000 - Special Character Sets (Tactic: Discovery)
+        | discoverSpecialCharSets
+            -> to-do
+
+        // AML.T0069.001 - System Instruction Keywords (Tactic: Discovery)
+        | discoverSystemKeywords
+            -> to-do
+
+        // AML.T0069.002 - System Prompt Discovery (Tactic: Discovery)
+        | discoverSystemPrompt
+            -> to-do
+
+        // AML.T0077 - LLM Response Rendering (Tactic: Exfiltration)
+        | llmResponseRendering
+            -> to-do
+
+        // AML.T0092 - Manipulate User LLM Chat History (Tactic: Defense Evasion)
+        | manipulateLLMChatHistory
+            -> to-do
+
+        // AML.T0094 - Delay Execution of LLM Instructions (Tactic: Defense Evasion)
+        | delayExecutionLLMInstructions
+            -> to-do
+
+        // AML.T0102 - Generate Malicious Commands (Tactic: ML Attack Staging)
+        | generateMaliciousCommands
+            -> to-do
+
+        // AML.T0088 - Generate Deepfakes (Tactic: ML Attack Staging)
+        | generateDeepfakes
+            -> to-do
+
+        // Defense: AML.M0003 - Model Hardening
+        # modelHardening
+            -> to-do
+
+        // Defense: AML.M0006 - Use Ensemble Methods
+        # useEnsembleMethods
+            -> to-do
+
+        // Defense: AML.M0020 - Generative AI Guardrails
+        # generativeAIGuardrails
+            -> to-do
+
+        // Defense: AML.M0021 - Generative AI Guidelines
+        # generativeAIGuidelines
+            -> to-do
+
+        // Defense: AML.M0022 - Generative AI Model Alignment
+        # generativeAIModelAlignment
+            -> to-do
+
+        // Defense: AML.M0002 - Passive AI Output Obfuscation
+        # passiveOutputObfuscation
+            -> to-do
+
+        // Defense: AML.M0010 - Input Restoration
+        # inputRestoration
+            -> to-do
+
+        // Defense: AML.M0015 - Adversarial Input Detection
+        # adversarialInputDetection
+            -> to-do
+
+        // Defense: AML.M0008 - Validate AI Model
+        # validateAIModel
+            -> to-do
+
+    }
+
+    // --------------------------------------------------------
+    // P.1.2 Application Service
+    // --------------------------------------------------------
+    asset ApplicationService {
+
+        // AML.T0049 - Exploit Public-Facing Application (Tactic: Initial Access)
+        | exploitPublicFacingApplication
+            -> to-do
+
+        // AML.T0040 - AI Model Inference API Access (Tactic: ML Model Access)
+        | inferenceAPIAccess
+            -> to-do
+
+        // AML.T0047 - AI-Enabled Product or Service (Tactic: ML Model Access)
+        | accessAIEnabledProductOrService
+            -> to-do
+
+        // AML.T0029 - Denial of AI Service (Tactic: Impact)
+        | denialOfAIService
+            -> to-do
+
+        // AML.T0034 - Cost Harvesting (Tactic: Impact)
+        | costHarvesting
+            -> to-do
+
+        // AML.T0046 - Spamming AI System with Chaff Data (Tactic: Impact)
+        | spamChaffData
+            -> to-do
+
+        // AML.T0051 - LLM Prompt Injection via Application (Tactic: Execution)
+        | llmPromptInjectionViaApp
+            -> to-do
+
+        // AML.T0052 - Phishing (Tactic: Initial Access, Lateral Movement)
+        | phishing
+            -> to-do
+
+        // AML.T0052.000 - Spearphishing via Social Engineering LLM (Tactic: Initial Access)
+        | spearphishingViaLLM
+            -> to-do
+
+        // AML.T0093 - Prompt Infiltration via Public-Facing Application (Tactic: Initial Access, Persistence)
+        | promptInfiltration
+            -> to-do
+
+        // AML.T0078 - Drive-by Compromise (Tactic: Initial Access)
+        | driveByCompromise
+            -> to-do
+
+        // AML.T0100 - AI Agent Clickbait (Tactic: Execution)
+        | aiAgentClickbait
+            -> to-do
+
+        // Defense: AML.M0004 - Restrict Number of AI Model Queries
+        # restrictModelQueries
+            -> to-do
+
+        // Defense: AML.M0019 - Control Access to AI Models and Data in Production
+        # controlAccessProduction
+            -> to-do
+
+        // Defense: AML.M0015 - Adversarial Input Detection
+        # adversarialInputDetectionApp
+            -> to-do
+
+        // Defense: AML.M0033 - Input and Output Validation for AI Agent Components
+        # inputOutputValidation
+            -> to-do
+
+    }
+
+    // --------------------------------------------------------
+    // P.1.3.1 Retrieval Module
+    // --------------------------------------------------------
+    asset RetrievalModule {
+
+        // AML.T0064 - Gather RAG-Indexed Targets (Tactic: Reconnaissance)
+        | gatherRAGIndexedTargets
+            -> to-do
+
+        // AML.T0070 - RAG Poisoning (Tactic: Persistence)
+        | ragPoisoning
+            -> to-do
+
+        // AML.T0071 - False RAG Entry Injection (Tactic: Defense Evasion)
+        | falseRAGEntryInjection
+            -> to-do
+
+        // AML.T0066 - Retrieval Content Crafting (Tactic: Resource Development)
+        | retrievalContentCrafting
+            -> to-do
+
+        // AML.T0085 - Data from AI Services (Tactic: Collection)
+        | dataFromAIServices
+            -> to-do
+
+        // AML.T0085.000 - RAG Databases Data Harvest (Tactic: Collection)
+        | ragDataHarvest
+            -> to-do
+
+        // AML.T0082 - RAG Credential Harvesting (Tactic: Credential Access)
+        | ragCredentialHarvesting
+            -> to-do
+
+        // Defense: AML.M0020 - Generative AI Guardrails
+        # generativeAIGuardrailsRAG
+            -> to-do
+
+        // Defense: AML.M0026 - Privileged AI Agent Permissions Configuration
+        # privilegedAgentPermissions
+            -> to-do
+
+        // Defense: AML.M0027 - Single-User AI Agent Permissions Configuration
+        # singleUserAgentPermissions
+            -> to-do
+
+        // Defense: AML.M0032 - Segmentation of AI Agent Components
+        # segmentationAIAgentComponents
+            -> to-do
+
+        // Defense: AML.M0033 - Input and Output Validation for AI Agent Components
+        # inputOutputValidationRAG
+            -> to-do
+
+    }
+
+    // --------------------------------------------------------
+    // P.1.3.2 Embedding Model
+    // --------------------------------------------------------
+    asset EmbeddingModel {
+
+        // AML.T0015 - Evade AI Model (Tactic: Initial Access, Defense Evasion, Impact)
+        | evadeEmbeddingModel
+            -> to-do
+
+        // AML.T0031 - Erode AI Model Integrity (Tactic: Impact)
+        | erodeEmbeddingModelIntegrity
+            -> to-do
+
+        // AML.T0043 - Craft Adversarial Data targeting Embedding (Tactic: ML Attack Staging)
+        | craftAdversarialDataEmbedding
+            -> to-do
+
+        // AML.T0014 - Discover AI Model Family (Tactic: Discovery)
+        | discoverEmbeddingModelFamily
+            -> to-do
+
+        // Defense: AML.M0003 - Model Hardening
+        # embeddingModelHardening
+            -> to-do
+
+        // Defense: AML.M0010 - Input Restoration
+        # inputRestorationEmbedding
+            -> to-do
+
+        // Defense: AML.M0015 - Adversarial Input Detection
+        # adversarialInputDetectionEmbedding
+            -> to-do
+
+    }
+
+    // --------------------------------------------------------
+    // D.4 Vector DB Storage
+    // --------------------------------------------------------
+    asset VectorDBStorage {
+
+        // AML.T0070 - RAG Poisoning via Vector DB (Tactic: Persistence)
+        | ragPoisoningVectorDB
+            -> to-do
+
+        // AML.T0071 - False RAG Entry Injection (Tactic: Defense Evasion)
+        | falseRAGEntryInjectionVectorDB
+            -> to-do
+
+        // AML.T0082 - RAG Credential Harvesting (Tactic: Credential Access)
+        | ragCredentialHarvestingVectorDB
+            -> to-do
+
+        // AML.T0085.000 - RAG Databases Data Harvest (Tactic: Collection)
+        | ragDataHarvestVectorDB
+            -> to-do
+
+        // AML.T0036 - Data from Information Repositories (Tactic: Collection)
+        | dataFromVectorDBRepository
+            -> to-do
+
+        // AML.T0037 - Data from Local System (Tactic: Collection)
+        | dataFromLocalSystem
+            -> to-do
+
+        // AML.T0025 - Exfiltration via Cyber Means (Tactic: Exfiltration)
+        | exfiltrationViaCyberMeans
+            -> to-do
+
+        // Defense: AML.M0005 - Control Access to AI Models and Data at Rest
+        # controlAccessAtRest
+            -> to-do
+
+        // Defense: AML.M0012 - Encrypt Sensitive Information
+        # encryptSensitiveInfo
+            -> to-do
+
+        // Defense: AML.M0032 - Segmentation of AI Agent Components
+        # segmentationVectorDB
+            -> to-do
+
+        // Defense: AML.M0025 - Maintain AI Dataset Provenance
+        # maintainDatasetProvenance
+            -> to-do
+
+    }
+
+    // --------------------------------------------------------
+    // D.1 External Data Storage
+    // --------------------------------------------------------
+    asset ExternalDataStorage {
+
+        // AML.T0036 - Data from Information Repositories (Tactic: Collection)
+        | dataFromExternalRepository
+            -> to-do
+
+        // AML.T0037 - Data from Local System (Tactic: Collection)
+        | dataFromExternalLocalSystem
+            -> to-do
+
+        // AML.T0025 - Exfiltration via Cyber Means (Tactic: Exfiltration)
+        | exfiltrationExternalDataViaCyber
+            -> to-do
+
+        // AML.T0010.002 - AI Supply Chain Compromise: Data (Tactic: Initial Access)
+        | supplyChainCompromiseData
+            -> to-do
+
+        // AML.T0020 - Poison Training Data (Tactic: Resource Development, Persistence)
+        | poisonExternalData
+            -> to-do
+
+        // Defense: AML.M0005 - Control Access to AI Models and Data at Rest
+        # controlAccessExternalDataAtRest
+            -> to-do
+
+        // Defense: AML.M0007 - Sanitize Training Data
+        # sanitizeExternalData
+            -> to-do
+
+        // Defense: AML.M0012 - Encrypt Sensitive Information
+        # encryptExternalData
+            -> to-do
+
+        // Defense: AML.M0025 - Maintain AI Dataset Provenance
+        # maintainExternalDataProvenance
+            -> to-do
+
+    }
+
+    // --------------------------------------------------------
+    // E.1 World Wide Web
+    // --------------------------------------------------------
+    asset WorldWideWeb {
+
+        // AML.T0000 - Search Open Technical Databases (Tactic: Reconnaissance)
+        | searchOpenTechnicalDatabases
+            -> to-do
+
+        // AML.T0000.000 - Journals and Conference Proceedings (Tactic: Reconnaissance)
+        | searchJournalsAndConferences
+            -> to-do
+
+        // AML.T0000.001 - Pre-Print Repositories (Tactic: Reconnaissance)
+        | searchPrePrintRepositories
+            -> to-do
+
+        // AML.T0000.002 - Technical Blogs (Tactic: Reconnaissance)
+        | searchTechnicalBlogs
+            -> to-do
+
+        // AML.T0001 - Search Open AI Vulnerability Analysis (Tactic: Reconnaissance)
+        | searchOpenVulnAnalysis
+            -> to-do
+
+        // AML.T0003 - Search Victim-Owned Websites (Tactic: Reconnaissance)
+        | searchVictimWebsites
+            -> to-do
+
+        // AML.T0004 - Search Application Repositories (Tactic: Reconnaissance)
+        | searchApplicationRepositories
+            -> to-do
+
+        // AML.T0006 - Active Scanning (Tactic: Reconnaissance)
+        | activeScanning
+            -> to-do
+
+        // AML.T0064 - Gather RAG-Indexed Targets (Tactic: Reconnaissance)
+        | gatherRAGTargetsFromWeb
+            -> to-do
+
+        // AML.T0078 - Drive-by Compromise via Web (Tactic: Initial Access)
+        | driveByCompromiseWeb
+            -> to-do
+
+        // AML.T0095 - Search Open Websites/Domains (Tactic: Reconnaissance)
+        | searchOpenWebsitesDomains
+            -> to-do
+
+        // AML.T0087 - Gather Victim Identity Information (Tactic: Reconnaissance)
+        | gatherVictimIdentityInfo
+            -> to-do
+
+        // Defense: AML.M0000 - Limit Public Release of Information
+        # limitPublicInfoRelease
+            -> to-do
+
+    }
+
+    // --------------------------------------------------------
+    // D.2.2 Fine Tuning Data Storage
+    // --------------------------------------------------------
+    asset FineTuningDataStorage {
+
+        // AML.T0020 - Poison Training Data (Tactic: Resource Development, Persistence)
+        | poisonFineTuningData
+            -> to-do
+
+        // AML.T0010.002 - AI Supply Chain Compromise: Data (Tactic: Initial Access)
+        | supplyChainCompromiseFineTuningData
+            -> to-do
+
+        // AML.T0025 - Exfiltration via Cyber Means (Tactic: Exfiltration)
+        | exfiltrationFineTuningDataViaCyber
+            -> to-do
+
+        // AML.T0035 - AI Artifact Collection (Tactic: Collection)
+        | collectFineTuningArtifacts
+            -> to-do
+
+        // Defense: AML.M0005 - Control Access to AI Models and Data at Rest
+        # controlAccessFineTuningAtRest
+            -> to-do
+
+        // Defense: AML.M0007 - Sanitize Training Data
+        # sanitizeFineTuningData
+            -> to-do
+
+        // Defense: AML.M0014 - Verify AI Artifacts
+        # verifyFineTuningArtifacts
+            -> to-do
+
+        // Defense: AML.M0025 - Maintain AI Dataset Provenance
+        # maintainFineTuningDataProvenance
+            -> to-do
+
+    }
+
+    // --------------------------------------------------------
+    // D.2.1 Training Data Storage
+    // --------------------------------------------------------
+    asset TrainingDataStorage {
+
+        // AML.T0020 - Poison Training Data (Tactic: Resource Development, Persistence)
+        | poisonTrainingData
+            -> to-do
+
+        // AML.T0019 - Publish Poisoned Datasets (Tactic: Resource Development)
+        | publishPoisonedDatasets
+            -> to-do
+
+        // AML.T0010.002 - AI Supply Chain Compromise: Data (Tactic: Initial Access)
+        | supplyChainCompromiseTrainingData
+            -> to-do
+
+        // AML.T0059 - Erode Dataset Integrity (Tactic: Impact)
+        | erodeDatasetIntegrity
+            -> to-do
+
+        // AML.T0035 - AI Artifact Collection (Tactic: Collection)
+        | collectTrainingArtifacts
+            -> to-do
+
+        // AML.T0024.000 - Infer Training Data Membership (Tactic: Exfiltration)
+        | inferTrainingDataMembership
+            -> to-do
+
+        // AML.T0024.001 - Invert AI Model (Tactic: Exfiltration)
+        | invertAIModel
+            -> to-do
+
+        // AML.T0025 - Exfiltration via Cyber Means (Tactic: Exfiltration)
+        | exfiltrationTrainingDataViaCyber
+            -> to-do
+
+        // Defense: AML.M0001 - Limit Model Artifact Release
+        # limitModelArtifactRelease
+            -> to-do
+
+        // Defense: AML.M0005 - Control Access to AI Models and Data at Rest
+        # controlAccessTrainingAtRest
+            -> to-do
+
+        // Defense: AML.M0007 - Sanitize Training Data
+        # sanitizeTrainingData
+            -> to-do
+
+        // Defense: AML.M0014 - Verify AI Artifacts
+        # verifyTrainingArtifacts
+            -> to-do
+
+        // Defense: AML.M0023 - AI Bill of Materials
+        # aiBoM
+            -> to-do
+
+        // Defense: AML.M0025 - Maintain AI Dataset Provenance
+        # maintainTrainingDataProvenance
+            -> to-do
+
+    }
+
+    // --------------------------------------------------------
+    // E.2 Cloud Storage
+    // --------------------------------------------------------
+    asset CloudStorage {
+
+        // AML.T0075 - Cloud Service Discovery (Tactic: Discovery)
+        | cloudServiceDiscovery
+            -> to-do
+
+        // AML.T0025 - Exfiltration via Cyber Means (Tactic: Exfiltration)
+        | exfiltrationCloudViaCyber
+            -> to-do
+
+        // AML.T0035 - AI Artifact Collection (Tactic: Collection)
+        | collectCloudArtifacts
+            -> to-do
+
+        // AML.T0012 - Valid Accounts (Tactic: Initial Access, Privilege Escalation)
+        | validAccountsCloud
+            -> to-do
+
+        // AML.T0055 - Unsecured Credentials (Tactic: Credential Access)
+        | unsecuredCredentialsCloud
+            -> to-do
+
+        // AML.T0091.000 - Application Access Token (Tactic: Lateral Movement)
+        | applicationAccessTokenCloud
+            -> to-do
+
+        // Defense: AML.M0005 - Control Access to AI Models and Data at Rest
+        # controlAccessCloudAtRest
+            -> to-do
+
+        // Defense: AML.M0012 - Encrypt Sensitive Information
+        # encryptCloudData
+            -> to-do
+
+        // Defense: AML.M0019 - Control Access to AI Models and Data in Production
+        # controlAccessCloudProduction
+            -> to-do
+
+    }
+
+    // --------------------------------------------------------
+    // U.1 AI Users
+    // --------------------------------------------------------
+    asset AIUsers {
+
+        // AML.T0011 - User Execution (Tactic: Execution)
+        | userExecution
+            -> to-do
+
+        // AML.T0011.000 - Unsafe AI Artifacts (Tactic: Execution)
+        | executeUnsafeAIArtifact
+            -> to-do
+
+        // AML.T0011.001 - Malicious Package (Tactic: Execution)
+        | executeMaliciousPackage
+            -> to-do
+
+        // AML.T0011.002 - Poisoned AI Agent Tool (Tactic: Execution)
+        | executePoisonedAIAgentTool
+            -> to-do
+
+        // AML.T0011.003 - Malicious Link (Tactic: Execution)
+        | clickMaliciousLink
+            -> to-do
+
+        // AML.T0052 - Phishing (Tactic: Initial Access, Lateral Movement)
+        | phishingUser
+            -> to-do
+
+        // AML.T0052.000 - Spearphishing via Social Engineering LLM (Tactic: Initial Access)
+        | spearphishingViaLLMUser
+            -> to-do
+
+        // AML.T0087 - Gather Victim Identity Information (Tactic: Reconnaissance)
+        | gatherUserIdentityInfo
+            -> to-do
+
+        // AML.T0048.003 - User Harm (Tactic: Impact)
+        | userHarm
+            -> to-do
+
+        // Defense: AML.M0018 - User Training
+        # userTraining
+            -> to-do
+
+    }
+
+    // --------------------------------------------------------
+    // P.2.1 LLM Guardrail
+    // --------------------------------------------------------
+    asset LLMGuardrail {
+
+        // AML.T0054 - LLM Jailbreak (Tactic: Privilege Escalation, Defense Evasion)
+        | bypassGuardrailJailbreak
+            -> to-do
+
+        // AML.T0068 - LLM Prompt Obfuscation (Tactic: Defense Evasion)
+        | bypassGuardrailObfuscation
+            -> to-do
+
+        // AML.T0097 - Virtualization/Sandbox Evasion (Tactic: Defense Evasion)
+        | virtualizationSandboxEvasion
+            -> to-do
+
+        // AML.T0076 - Corrupt AI Model (Tactic: Defense Evasion)
+        | corruptAIModel
+            -> to-do
+
+        // AML.T0073 - Impersonation (Tactic: Defense Evasion)
+        | impersonation
+            -> to-do
+
+        // AML.T0074 - Masquerading (Tactic: Defense Evasion)
+        | masquerading
+            -> to-do
+
+        // AML.T0107 - Exploitation for Defense Evasion (Tactic: Defense Evasion)
+        | exploitForDefenseEvasion
+            -> to-do
+
+        // Defense: AML.M0020 - Generative AI Guardrails
+        # generativeAIGuardrailsActive
+            -> to-do
+
+        // Defense: AML.M0021 - Generative AI Guidelines
+        # generativeAIGuidelinesActive
+            -> to-do
+
+        // Defense: AML.M0022 - Generative AI Model Alignment
+        # generativeAIAlignmentActive
+            -> to-do
+
+    }
+
+    // --------------------------------------------------------
+    // U.2 Data Provider
+    // --------------------------------------------------------
+    asset DataProvider {
+
+        // AML.T0019 - Publish Poisoned Datasets (Tactic: Resource Development)
+        | publishPoisonedDatasetsByProvider
+            -> to-do
+
+        // AML.T0010.002 - AI Supply Chain Compromise: Data (Tactic: Initial Access)
+        | supplyChainDataProviderCompromise
+            -> to-do
+
+        // AML.T0059 - Erode Dataset Integrity (Tactic: Impact)
+        | erodeProviderDatasetIntegrity
+            -> to-do
+
+        // AML.T0048.000 - Financial Harm (Tactic: Impact)
+        | financialHarm
+            -> to-do
+
+        // AML.T0048.001 - Reputational Harm (Tactic: Impact)
+        | reputationalHarm
+            -> to-do
+
+        // Defense: AML.M0007 - Sanitize Training Data
+        # sanitizeProviderData
+            -> to-do
+
+        // Defense: AML.M0014 - Verify AI Artifacts
+        # verifyProviderArtifacts
+            -> to-do
+
+        // Defense: AML.M0023 - AI Bill of Materials
+        # aiBoMProvider
+            -> to-do
+
+        // Defense: AML.M0025 - Maintain AI Dataset Provenance
+        # maintainProviderDataProvenance
+            -> to-do
+
+    }
+
+    // --------------------------------------------------------
+    // D.3 Short-term Memory
+    // --------------------------------------------------------
+    asset ShortTermMemory {
+
+        // AML.T0080 - AI Agent Context Poisoning (Tactic: Persistence)
+        | contextPoisoning
+            -> to-do
+
+        // AML.T0080.000 - Memory Poisoning (Tactic: Persistence)
+        | memoryPoisoning
+            -> to-do
+
+        // AML.T0080.001 - Thread Poisoning (Tactic: Persistence)
+        | threadPoisoning
+            -> to-do
+
+        // AML.T0057 - LLM Data Leakage via Memory (Tactic: Exfiltration)
+        | llmDataLeakageViaMemory
+            -> to-do
+
+        // Defense: AML.M0031 - Memory Hardening
+        # memoryHardening
+            -> to-do
+
+    }
+
+    // --------------------------------------------------------
+    // P.1.1.1 Orchestration
+    // --------------------------------------------------------
+    asset Orchestration {
+
+        // AML.T0081 - Modify AI Agent Configuration (Tactic: Persistence, Defense Evasion)
+        | modifyAIAgentConfiguration
+            -> to-do
+
+        // AML.T0053 - AI Agent Tool Invocation (Tactic: Execution, Privilege Escalation)
+        | aiAgentToolInvocation
+            -> to-do
+
+        // AML.T0103 - Deploy AI Agent (Tactic: Execution)
+        | deployAIAgent
+            -> to-do
+
+        // AML.T0108 - AI Agent for C2 (Tactic: Command and Control)
+        | aiAgentC2
+            -> to-do
+
+        // AML.T0054 - LLM Jailbreak (Tactic: Privilege Escalation, Defense Evasion)
+        | llmJailbreakOrchestration
+            -> to-do
+
+        // AML.T0105 - Escape to Host (Tactic: Privilege Escalation)
+        | escapeToHost
+            -> to-do
+
+        // AML.T0048.002 - Societal Harm (Tactic: Impact)
+        | societalHarm
+            -> to-do
+
+        // Defense: AML.M0026 - Privileged AI Agent Permissions Configuration
+        # privilegedAgentPermissionsOrchestration
+            -> to-do
+
+        // Defense: AML.M0029 - Human In-the-Loop for AI Agent Actions
+        # humanInTheLoopAgentActions
+            -> to-do
+
+        // Defense: AML.M0030 - Restrict AI Agent Tool Invocation on Untrusted Data
+        # restrictToolInvocationUntrustedData
+            -> to-do
+
+        // Defense: AML.M0032 - Segmentation of AI Agent Components
+        # segmentationOrchestration
+            -> to-do
+
+    }
+
+    // --------------------------------------------------------
+    // P.1.1.2 Tool Calling Client (MCP Client)
+    // --------------------------------------------------------
+    asset ToolCallingClient {
+
+        // AML.T0053 - AI Agent Tool Invocation (Tactic: Execution, Privilege Escalation)
+        | toolInvocationMCP
+            -> to-do
+
+        // AML.T0010.001 - AI Supply Chain Compromise: AI Software (Tactic: Initial Access)
+        | supplyChainSoftwareCompromiseMCP
+            -> to-do
+
+        // AML.T0086 - Exfiltration via AI Agent Tool Invocation (Tactic: Exfiltration)
+        | exfiltrationViaToolInvocation
+            -> to-do
+
+        // AML.T0101 - Data Destruction via AI Agent Tool Invocation (Tactic: Impact)
+        | dataDestructionViaToolInvocation
+            -> to-do
+
+        // AML.T0085.001 - AI Agent Tools Data Harvest (Tactic: Collection)
+        | agentToolDataHarvest
+            -> to-do
+
+        // AML.T0098 - AI Agent Tool Credential Harvesting (Tactic: Credential Access)
+        | agentToolCredentialHarvesting
+            -> to-do
+
+        // AML.T0083 - Credentials from AI Agent Configuration (Tactic: Credential Access)
+        | credentialsFromAgentConfig
+            -> to-do
+
+        // Defense: AML.M0013 - Code Signing
+        # codeSigning
+            -> to-do
+
+        // Defense: AML.M0028 - AI Agent Tools Permissions Configuration
+        # agentToolsPermissionsConfig
+            -> to-do
+
+        // Defense: AML.M0029 - Human In-the-Loop for AI Agent Actions
+        # humanInTheLoopMCP
+            -> to-do
+
+        // Defense: AML.M0030 - Restrict AI Agent Tool Invocation on Untrusted Data
+        # restrictToolInvocationMCP
+            -> to-do
+
+        // Defense: AML.M0033 - Input and Output Validation for AI Agent Components
+        # inputOutputValidationMCP
+            -> to-do
+
+    }
+
+    // --------------------------------------------------------
+    // P.1.4 Tool Integration Frameworks
+    // --------------------------------------------------------
+    asset ToolIntegrationFrameworks {
+
+        // AML.T0010.001 - AI Supply Chain Compromise: AI Software (Tactic: Initial Access)
+        | supplyChainSoftwareCompromiseFramework
+            -> to-do
+
+        // AML.T0012 - Valid Accounts (Tactic: Initial Access, Privilege Escalation)
+        | validAccountsFramework
+            -> to-do
+
+        // AML.T0050 - Command and Scripting Interpreter (Tactic: Execution)
+        | commandAndScriptingInterpreter
+            -> to-do
+
+        // AML.T0089 - Process Discovery (Tactic: Discovery)
+        | processDiscovery
+            -> to-do
+
+        // AML.T0084 - Discover AI Agent Configuration (Tactic: Discovery)
+        | discoverAgentConfiguration
+            -> to-do
+
+        // AML.T0084.000 - Embedded Knowledge Discovery (Tactic: Discovery)
+        | discoverEmbeddedKnowledge
+            -> to-do
+
+        // AML.T0084.001 - Tool Definitions Discovery (Tactic: Discovery)
+        | discoverToolDefinitions
+            -> to-do
+
+        // AML.T0084.002 - Activation Triggers Discovery (Tactic: Discovery)
+        | discoverActivationTriggers
+            -> to-do
+
+        // Defense: AML.M0011 - Restrict Library Loading
+        # restrictLibraryLoading
+            -> to-do
+
+        // Defense: AML.M0013 - Code Signing
+        # codeSigningFramework
+            -> to-do
+
+        // Defense: AML.M0016 - Vulnerability Scanning
+        # vulnerabilityScanning
+            -> to-do
+
+    }
+
+    // --------------------------------------------------------
+    // E.3.1 External Tools
+    // --------------------------------------------------------
+    asset ExternalTools {
+
+        // AML.T0053 - AI Agent Tool Invocation (Tactic: Execution, Privilege Escalation)
+        | toolInvocationExternal
+            -> to-do
+
+        // AML.T0099 - AI Agent Tool Data Poisoning (Tactic: Persistence)
+        | agentToolDataPoisoning
+            -> to-do
+
+        // AML.T0101 - Data Destruction via AI Agent Tool Invocation (Tactic: Impact)
+        | dataDestructionExternalTool
+            -> to-do
+
+        // AML.T0086 - Exfiltration via AI Agent Tool Invocation (Tactic: Exfiltration)
+        | exfiltrationViaExternalTool
+            -> to-do
+
+        // AML.T0104 - Publish Poisoned AI Agent Tool (Tactic: Resource Development)
+        | publishPoisonedAgentTool
+            -> to-do
+
+        // Defense: AML.M0028 - AI Agent Tools Permissions Configuration
+        # agentToolsPermissionsExternal
+            -> to-do
+
+        // Defense: AML.M0032 - Segmentation of AI Agent Components
+        # segmentationExternalTools
+            -> to-do
+
+        // Defense: AML.M0033 - Input and Output Validation for AI Agent Components
+        # inputOutputValidationExternalTools
+            -> to-do
+
+    }
+
+    // --------------------------------------------------------
+    // E.3.2 API
+    // --------------------------------------------------------
+    asset API {
+
+        // AML.T0040 - AI Model Inference API Access (Tactic: ML Model Access)
+        | inferenceAPIAccessAPI
+            -> to-do
+
+        // AML.T0024 - Exfiltration via AI Inference API (Tactic: Exfiltration)
+        | exfiltrationViaInferenceAPI
+            -> to-do
+
+        // AML.T0024.000 - Infer Training Data Membership (Tactic: Exfiltration)
+        | inferTrainingDataMembershipAPI
+            -> to-do
+
+        // AML.T0024.001 - Invert AI Model (Tactic: Exfiltration)
+        | invertAIModelAPI
+            -> to-do
+
+        // AML.T0024.002 - Extract AI Model (Tactic: Exfiltration)
+        | extractAIModelAPI
+            -> to-do
+
+        // AML.T0048.004 - AI Intellectual Property Theft (Tactic: Impact)
+        | aiIntellectualPropertyTheft
+            -> to-do
+
+        // AML.T0096 - AI Service API for C2 (Tactic: Command and Control)
+        | aiServiceAPIAsC2
+            -> to-do
+
+        // AML.T0055 - Unsecured Credentials (Tactic: Credential Access)
+        | unsecuredCredentialsAPI
+            -> to-do
+
+        // AML.T0106 - Exploitation for Credential Access (Tactic: Credential Access)
+        | exploitForCredentialAccess
+            -> to-do
+
+        // AML.T0090 - OS Credential Dumping (Tactic: Credential Access)
+        | osCredentialDumping
+            -> to-do
+
+        // AML.T0091 - Use Alternate Authentication Material (Tactic: Lateral Movement)
+        | useAlternateAuthMaterial
+            -> to-do
+
+        // AML.T0091.000 - Application Access Token (Tactic: Lateral Movement)
+        | applicationAccessToken
+            -> to-do
+
+        // Defense: AML.M0004 - Restrict Number of AI Model Queries
+        # restrictAPIQueries
+            -> to-do
+
+        // Defense: AML.M0019 - Control Access to AI Models and Data in Production
+        # controlAccessAPIProduction
+            -> to-do
+
+        // Defense: AML.M0024 - AI Telemetry Logging
+        # aiTelemetryLoggingAPI
+            -> to-do
+
+        // Defense: AML.M0002 - Passive AI Output Obfuscation
+        # passiveAPIOutputObfuscation
+            -> to-do
+
+    }
+
+    // --------------------------------------------------------
+    // E.3.3 Browser Client
+    // --------------------------------------------------------
+    asset BrowserClient {
+
+        // AML.T0078 - Drive-by Compromise (Tactic: Initial Access)
+        | driveByCompromiseBrowser
+            -> to-do
+
+        // AML.T0100 - AI Agent Clickbait (Tactic: Execution)
+        | aiAgentClickbaitBrowser
+            -> to-do
+
+        // AML.T0051.001 - Indirect Prompt Injection via Web (Tactic: Execution)
+        | indirectPromptInjectionWeb
+            -> to-do
+
+        // AML.T0077 - LLM Response Rendering (Tactic: Exfiltration)
+        | llmResponseRenderingBrowser
+            -> to-do
+
+        // AML.T0072 - Reverse Shell (Tactic: Command and Control)
+        | reverseShell
+            -> to-do
+
+        // Defense: AML.M0033 - Input and Output Validation for AI Agent Components
+        # inputOutputValidationBrowser
+            -> to-do
+
+        // Defense: AML.M0020 - Generative AI Guardrails
+        # generativeAIGuardrailsBrowser
+            -> to-do
+
+    }
+
+    // --------------------------------------------------------
+    // P.1.1.3.1 Model Customization
+    // --------------------------------------------------------
+    asset ModelCustomization {
+
+        // AML.T0005 - Create Proxy AI Model (Tactic: ML Attack Staging)
+        | createProxyAIModel
+            -> to-do
+
+        // AML.T0005.000 - Train Proxy via Gathered AI Artifacts (Tactic: ML Attack Staging)
+        | trainProxyViaArtifacts
+            -> to-do
+
+        // AML.T0005.001 - Train Proxy via Replication (Tactic: ML Attack Staging)
+        | trainProxyViaReplication
+            -> to-do
+
+        // AML.T0005.002 - Use Pre-Trained Model (Tactic: ML Attack Staging)
+        | usePreTrainedModel
+            -> to-do
+
+        // AML.T0044 - Full AI Model Access (Tactic: ML Model Access)
+        | fullAIModelAccess
+            -> to-do
+
+        // AML.T0010.003 - AI Supply Chain Compromise: Model (Tactic: Initial Access)
+        | supplyChainModelCompromise
+            -> to-do
+
+        // AML.T0017 - Develop Capabilities (Tactic: Resource Development)
+        | developCapabilities
+            -> to-do
+
+        // AML.T0017.000 - Develop Adversarial AI Attacks (Tactic: Resource Development)
+        | developAdversarialAIAttacks
+            -> to-do
+
+        // AML.T0065 - LLM Prompt Crafting (Tactic: Resource Development)
+        | llmPromptCrafting
+            -> to-do
+
+        // AML.T0042 - Verify Attack (Tactic: ML Attack Staging)
+        | verifyAttack
+            -> to-do
+
+        // Defense: AML.M0001 - Limit Model Artifact Release
+        # limitModelArtifactReleaseCustom
+            -> to-do
+
+        // Defense: AML.M0005 - Control Access to AI Models and Data at Rest
+        # controlAccessModelCustomAtRest
+            -> to-do
+
+        // Defense: AML.M0008 - Validate AI Model
+        # validateAIModelCustom
+            -> to-do
+
+        // Defense: AML.M0013 - Code Signing
+        # codeSigningModelCustom
+            -> to-do
+
+        // Defense: AML.M0017 - AI Model Distribution Methods
+        # aiModelDistributionMethods
+            -> to-do
+
+    }
+
+}
